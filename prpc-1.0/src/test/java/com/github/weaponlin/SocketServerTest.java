@@ -1,25 +1,20 @@
 package com.github.weaponlin;
 
-import com.github.weaponlin.inf.PRPCRequest;
-import com.github.weaponlin.util.ByteUtils;
+import com.github.weaponlin.client.PRequest;
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.reflections.Reflections;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Set;
 
-public class Server {
+@Deprecated
+public class SocketServerTest {
     public static void main(String[] args) throws IOException {
 
         ServerSocket ss = new ServerSocket(8888);
@@ -36,11 +31,16 @@ public class Server {
                         final OutputStream os = s.getOutputStream();
                         ObjectOutputStream oos = new ObjectOutputStream(os);
                         ObjectInputStream ois = new ObjectInputStream(is);
+                        PRequest request = (PRequest) ois.readObject();
+                        System.out.println("request: " + request);
 
-                        PRPCRequest request = (PRPCRequest) ois.readObject();
-                        Class<?> c = Class.forName(request.getServiceName());
-                        Constructor<?> cons = c.getConstructor();
-                        Object object = cons.newInstance();
+                        // TODO get subType by myself, and supplement cache to improve performance, support interface or pojo class
+                        Reflections reflections = new Reflections(request.getServiceName());
+                        final Class<?> apiClass = Class.forName(request.getServiceName());
+                        final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
+                        final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
+                        final Object object = implementationClass.getConstructor().newInstance();
+
                         Object response = MethodUtils.invokeMethod(object, request.getMethodName(), request.getParams());
                         oos.writeObject(response);
                         oos.flush();
