@@ -1,8 +1,9 @@
-package com.github.weaponlin.codec;
+package com.github.weaponlin.codec.protobuf;
 
+import com.github.weaponlin.codec.PCodec;
 import com.github.weaponlin.codec.schema.Schema;
 
-public class DubboCodec implements PCodec {
+public class ProtobufCodec implements PCodec {
 
     @Override
     public byte[] encode(Object object, Schema schema) {

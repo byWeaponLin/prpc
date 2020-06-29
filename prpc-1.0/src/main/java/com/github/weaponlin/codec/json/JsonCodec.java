@@ -1,5 +1,6 @@
-package com.github.weaponlin.codec;
+package com.github.weaponlin.codec.json;
 
+import com.github.weaponlin.codec.PCodec;
 import com.github.weaponlin.codec.schema.Schema;
 
 public class JsonCodec implements PCodec {

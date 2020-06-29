@@ -1,12 +1,12 @@
-package com.github.weaponlin.codec;
+package com.github.weaponlin.codec.dubbo;
 
+import com.github.weaponlin.codec.PCodec;
 import com.github.weaponlin.codec.schema.Schema;
 
-public class PrpcCodec implements PCodec {
+public class DubboCodec implements PCodec {
 
     @Override
     public byte[] encode(Object object, Schema schema) {
-        // TODO
         return new byte[0];
     }
 
