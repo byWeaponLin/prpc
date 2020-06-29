@@ -17,10 +17,13 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.reflections.Reflections;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NettyServer {
 
@@ -71,20 +74,34 @@ public class NettyServer {
         }
     }
 
-    public class NettyServerHandler extends ChannelInboundHandlerAdapter {
+    @Slf4j
+    public static class NettyServerHandler extends ChannelInboundHandlerAdapter {
+
+        private Map<String, Object> cachedInstances = new ConcurrentHashMap<>();
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             PRequest request = (PRequest) msg;
+            PResponse response = PResponse.builder()
+                    .requestId(request.getRequestId())
+                    .build();
+            try {
+                Object object = cachedInstances.get(request.getServiceName());
+                if (object == null) {
+                    Reflections reflections = new Reflections(request.getServiceName());
+                    final Class<?> apiClass = Class.forName(request.getServiceName());
+                    final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
+                    final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
+                    object = implementationClass.getConstructor().newInstance();
+                }
 
-            Reflections reflections = new Reflections(request.getServiceName());
-            final Class<?> apiClass = Class.forName(request.getServiceName());
-            final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
-            final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
-            final Object object = implementationClass.getConstructor().newInstance();
-
-            Object response = MethodUtils.invokeMethod(object, request.getMethodName(), request.getParams());
-
+                log.info("receive request, request id: {}", request.getRequestId());
+                Object result = MethodUtils.invokeMethod(object, request.getMethodName(), request.getParams());
+                response.setResult(result);
+            } catch (Exception e) {
+                log.error("invoke service implement failed", e);
+                response.setException(e);
+            }
             ctx.writeAndFlush(response);
             ctx.close();
         }
