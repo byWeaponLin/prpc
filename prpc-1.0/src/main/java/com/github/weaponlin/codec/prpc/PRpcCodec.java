@@ -3,6 +3,12 @@ package com.github.weaponlin.codec.prpc;
 import com.github.weaponlin.codec.PCodec;
 import com.github.weaponlin.codec.schema.Schema;
 
+/**
+ * key-length-value
+ * key: fix one byte, include field number and filed data type
+ * length: fix 4 byte
+ * value: value
+ */
 public class PRpcCodec implements PCodec {
 
     @Override
