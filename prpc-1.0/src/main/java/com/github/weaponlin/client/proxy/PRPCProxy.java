@@ -44,7 +44,7 @@ public class PRPCProxy implements InvocationHandler {
                 .methodName(method.getName())
                 .params(args)
                 .build();
-
+        // TODO fail strategy, eg: failover, failfast, failback, failsafe
         return sendRequest(request);
     }
 
