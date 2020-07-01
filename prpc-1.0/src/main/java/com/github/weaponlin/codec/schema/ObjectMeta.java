@@ -33,10 +33,23 @@ public class ObjectMeta {
                 .dataType(dataType)
                 .general(false)
                 .build();
+
+        // general type
         if (DataType.isGeneralType(typeClass.getTypeName())) {
             return schema.setGeneral(true);
         }
 
+        // enum
+        if (typeClass.isEnum()) {
+            return schema.setDataType(DataType._Enum)
+                    .setGeneral(true);
+        }
+
+        // TODO array
+
+        // TODO list
+
+        // custom class
         final List<Field> fields = Stream.of(typeClass.getDeclaredFields())
                 .filter(field -> (EXCEPT_FIELD_MODIFIER & field.getModifiers()) == 0)
                 .collect(toList());

@@ -1,6 +1,9 @@
 package com.github.weaponlin.codec.schema;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -58,6 +61,25 @@ public class ObjectMetaTryTest {
         System.out.println(ints.getClass().getTypeName());
         System.out.println(ints.getClass().getSuperclass().getTypeName());
         Stream.of(ints.getClass().getInterfaces()).filter(e -> List.class.equals(e)).map(Class::getTypeName).findFirst().ifPresent(System.out::println);
+    }
+
+    @org.junit.Test
+    public void test_enum() {
+        Type type = Type.type1;
+        System.out.println(type.ordinal());
+        System.out.println(type.getClass().isEnum());
+    }
+
+    @Getter
+    @AllArgsConstructor
+    enum Type {
+        type1(1),
+        type2(2),
+        type3(3)
+
+        ;
+
+        private int type;
     }
 
     @Data

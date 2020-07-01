@@ -7,9 +7,22 @@ import com.github.weaponlin.codec.schema.Schema;
 /**
  * key-length-value
  * key: fix one byte, include field number and filed data type
- * length: fix 4 byte
+ * length: fix 4 bytes
  * value: value
- * support data type {@link DataType}
+ *
+ * <p>
+ *     key-value structure:
+ *          byte, Byte, short, Short, int, Integer, float, Float, long, Long, enum
+ *     key-length-value structure: length fixed 4 bytes
+ *          String, Custom Class
+ *     key-size-value: size fixed 4 bytes, max size = 0xFFFF
+ *          array, list
+ * </p>
+ *
+ * <p>
+ *  support data type: {@link DataType}
+ *  not support data type: Map and subClass, Set and subClass
+ * </p>
  */
 public class PRpcCodec implements PCodec {
 

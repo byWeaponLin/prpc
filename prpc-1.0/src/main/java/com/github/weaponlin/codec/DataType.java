@@ -88,7 +88,7 @@ public enum DataType {
     /**
      * TODO array
      */
-    _array(9, ""),
+    _Array(9, ""),
 
     /**
      * TODO List
@@ -102,12 +102,18 @@ public enum DataType {
     private String name;
 
     /**
-     * primitive type
+     * primitive type map
      */
     public static Map<String, DataType> primitiveType;
 
+    /**
+     * type name map
+     */
     public static Map<String, DataType> typeNameMap;
 
+    /**
+     * general type map
+     */
     public static Map<String, DataType> generalTypeMap;
 
     static {
