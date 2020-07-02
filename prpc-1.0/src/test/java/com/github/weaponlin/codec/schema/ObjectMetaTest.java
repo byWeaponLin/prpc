@@ -34,6 +34,14 @@ public class ObjectMetaTest {
             private byte d;
 
             private String e;
+
+            private int[] f;
+
+            private String[] g;
+
+            private List h;
+
+            private List<Integer> i;
         }
 
         @Data
@@ -92,5 +100,33 @@ public class ObjectMetaTest {
         assertTrue(CollectionUtils.isEmpty(embeddedFields.get(1).getSchemas()));
         assertEquals(1, embeddedFields.get(1).getFieldNumber());
         assertEquals(String.class, embeddedFields.get(1).getTypeClass());
+
+        assertEquals("f", embeddedFields.get(2).getFieldName());
+        assertEquals(DataType._Array, embeddedFields.get(2).getDataType());
+        assertFalse(embeddedFields.get(2).isGeneral());
+        assertTrue(CollectionUtils.isEmpty(embeddedFields.get(2).getSchemas()));
+        assertEquals(2, embeddedFields.get(2).getFieldNumber());
+//        assertEquals("", embeddedFields.get(2).getTypeClass());
+
+        assertEquals("g", embeddedFields.get(3).getFieldName());
+        assertEquals(DataType._Array, embeddedFields.get(3).getDataType());
+        assertFalse(embeddedFields.get(3).isGeneral());
+        assertTrue(CollectionUtils.isEmpty(embeddedFields.get(3).getSchemas()));
+        assertEquals(3, embeddedFields.get(3).getFieldNumber());
+//        assertEquals(String.class, embeddedFields.get(3).getTypeClass());
+
+        assertEquals("h", embeddedFields.get(4).getFieldName());
+        assertEquals(DataType._List, embeddedFields.get(4).getDataType());
+        assertFalse(embeddedFields.get(4).isGeneral());
+        assertTrue(CollectionUtils.isEmpty(embeddedFields.get(4).getSchemas()));
+        assertEquals(4, embeddedFields.get(4).getFieldNumber());
+//        assertEquals(String.class, embeddedFields.get(4).getTypeClass());
+
+        assertEquals("i", embeddedFields.get(5).getFieldName());
+        assertEquals(DataType._List, embeddedFields.get(5).getDataType());
+        assertFalse(embeddedFields.get(5).isGeneral());
+        assertTrue(CollectionUtils.isEmpty(embeddedFields.get(5).getSchemas()));
+        assertEquals(5, embeddedFields.get(5).getFieldNumber());
+//        assertEquals(String.class, embeddedFields.get(5).getTypeClass());
     }
 }

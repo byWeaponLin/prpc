@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.weaponlin.codec.DataType.*;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,7 +26,8 @@ public class ObjectMeta {
         if (typeClass == null) {
             throw new PException("typeClass is null");
         }
-        final DataType dataType = DataType.getDataType(typeClass.getTypeName());
+
+        final DataType dataType = getDataType(typeClass);
         Schema schema = Schema.builder()
                 .fieldName(fieldName)
                 .fieldNumber(fieldNumber)
@@ -33,37 +35,58 @@ public class ObjectMeta {
                 .dataType(dataType)
                 .general(false)
                 .build();
-
-        // general type
-        if (DataType.isGeneralType(typeClass.getTypeName())) {
-            return schema.setGeneral(true);
+        switch (dataType) {
+            case _byte:
+            case _Byte:
+            case _short:
+            case _Short:
+            case _int:
+            case _Integer:
+            case _long:
+            case _Long:
+            case _float:
+            case _Float:
+            case _double:
+            case _Double:
+            case _String:
+            case _Enum:
+                schema.setGeneral(true);
+                return schema;
+            case _Object:
+                schema.setGeneral(false);
+                schema.setSchemas(readEmbeddedSchema(typeClass));
+                return schema;
+            case _Array:
+            case _List:
+                schema.setGeneral(false);
+                return schema;
+            case _Unknown:
+                schema.setGeneral(false);
+                return schema;
+            default:
+                schema.setGeneral(false);
+                return schema;
         }
+    }
 
-        // enum
-        if (typeClass.isEnum()) {
-            return schema.setDataType(DataType._Enum)
-                    .setGeneral(true);
-        }
-
-        // TODO array
-
-        // TODO list
-
-        // custom class
+    /**
+     * read embedded schema
+     * @param typeClass
+     * @return
+     */
+    private static List<Schema> readEmbeddedSchema(Class<?> typeClass) {
+        // read object class field info
         final List<Field> fields = Stream.of(typeClass.getDeclaredFields())
                 .filter(field -> (EXCEPT_FIELD_MODIFIER & field.getModifiers()) == 0)
                 .collect(toList());
 
         if (CollectionUtils.isEmpty(fields)) {
-            return schema;
+            return null;
         }
 
-        final List<Schema> embeddedSchemas = IntStream.range(0, fields.size()).mapToObj(idx -> {
+        return IntStream.range(0, fields.size()).mapToObj(idx -> {
             final Field field = fields.get(idx);
             return readObjectMeta(field.getName(), field.getType(), idx);
         }).collect(toList());
-
-        schema.setSchemas(embeddedSchemas);
-        return schema;
     }
 }

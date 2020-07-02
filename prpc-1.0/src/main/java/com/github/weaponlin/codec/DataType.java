@@ -4,7 +4,9 @@ package com.github.weaponlin.codec;
 import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 public enum DataType {
@@ -81,7 +83,7 @@ public enum DataType {
 
 
     /**
-     * TODO
+     * TODO don't support, remove it
      */
     _Object(8, ""),
 
@@ -94,6 +96,8 @@ public enum DataType {
      * TODO List
      */
     _List(10, "java.util.List"),
+
+    _Unknown(11, ""),
 
     ;
 
@@ -169,12 +173,26 @@ public enum DataType {
     }
 
     /**
-     * get dataType by type name
-     * @param typeName
+     * get dataType by type class
+     * @param typeClass
      * @return
      */
-    public static DataType getDataType(String typeName) {
-        return typeNameMap.getOrDefault(typeName, _Object);
+    public static DataType getDataType(Class<?> typeClass) {
+        if (typeClass == null) {
+            return DataType._Unknown;
+        } else if (generalTypeMap.containsKey(typeClass.getName())) {
+            return generalTypeMap.get(typeClass.getName());
+        } else if (typeClass.isEnum()) {
+            return DataType._Enum;
+        } else if (typeClass.isArray()) {
+            return DataType._Array;
+        }
+        // TODO exclude Map, Set, Object
+        return Stream.of(typeClass.getInterfaces(), typeClass)
+                .filter(i -> i == List.class)
+                .findAny()
+                .map(i -> DataType._List)
+                .orElse(DataType._Object);
     }
 
 }
