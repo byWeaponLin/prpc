@@ -1,8 +1,7 @@
-package com.github.weaponlin.codec.prpc;
+package com.github.weaponlin.codec.protocol.prpc;
 
-import com.github.weaponlin.codec.DataType;
-import com.github.weaponlin.codec.PCodec;
-import com.github.weaponlin.codec.schema.Schema;
+import com.github.weaponlin.codec.protocol.schema.DataType;
+import com.github.weaponlin.codec.protocol.PCodec;
 
 /**
  * key-length-value
@@ -15,7 +14,7 @@ import com.github.weaponlin.codec.schema.Schema;
  *          byte, Byte, short, Short, int, Integer, float, Float, long, Long, enum
  *     key-length-value structure: length fixed 4 bytes
  *          String, Custom Class
- *     key-size-value: size fixed 4 bytes, max size = 0xFFFF
+ *     key-capacity-value: capacity fixed 4 bytes, max capacity = 0xFFFF
  *          array, list
  * </p>
  *
@@ -27,14 +26,12 @@ import com.github.weaponlin.codec.schema.Schema;
 public class PRpcCodec implements PCodec {
 
     @Override
-    public byte[] encode(Object object, Schema schema) {
-        // TODO
+    public byte[] encode(Object o) {
         return new byte[0];
     }
 
     @Override
-    public Object decode(byte[] bytes) {
-        // TODO
+    public Object decode(byte[] bytes, Object o) {
         return null;
     }
 }

@@ -2,12 +2,12 @@ package com.github.weaponlin.client.proxy;
 
 
 import com.github.weaponlin.client.PRequest;
+import com.github.weaponlin.codec.PDecoder;
+import com.github.weaponlin.codec.PEncoder;
 import com.github.weaponlin.exception.PException;
 import com.github.weaponlin.server.PResponse;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -17,9 +17,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -33,8 +32,11 @@ public class PRPCProxy implements InvocationHandler {
 
     private Class<?> klass;
 
+    private PEncoder pEncoder;
+
     public PRPCProxy(Class<?> klass) {
         this.klass = klass;
+        this.pEncoder = new PEncoder(klass);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -51,7 +53,7 @@ public class PRPCProxy implements InvocationHandler {
 
     private Object sendRequest(PRequest request) {
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        ClientNettyHandler clientNettyHandler = new ClientNettyHandler();
+        ClientHandler clientHandler = new ClientHandler();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
@@ -61,20 +63,19 @@ public class PRPCProxy implements InvocationHandler {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
-
+                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
                             pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
                             pipeline.addLast(new LengthFieldPrepender(4));
 
-                            // 这里采用jdk的序列化机制
-                            pipeline.addLast("jdkencoder", new ObjectEncoder());
-                            pipeline.addLast("jdkdecoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                            // 自定义序列化协议
+                            pipeline.addLast(pEncoder);
+                            pipeline.addLast(new PDecoder(PResponse.class));
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline
-                            pipeline.addLast(clientNettyHandler);
+                            pipeline.addLast(clientHandler);
 
                         }
                     });
-
             ChannelFuture future = bootstrap.connect("127.0.0.1", 8888).sync();
             future.channel().writeAndFlush(request).sync();
             future.channel().closeFuture().sync();
@@ -84,10 +85,11 @@ public class PRPCProxy implements InvocationHandler {
         } finally {
             eventLoopGroup.shutdownGracefully();
         }
-        final PResponse response = (PResponse) clientNettyHandler.getRes();
+        final PResponse response = (PResponse) clientHandler.getRes();
         if (response == null) {
             // TODO response is null if response is too large
-            throw new PException("response is null");
+//            throw new PException("response is null");
+            return null;
         } else if (response.getException() == null) {
             return response.getResult();
         } else {
@@ -98,24 +100,5 @@ public class PRPCProxy implements InvocationHandler {
     private String getMessage(PRequest request, PResponse response) {
         return String.format(FORMAT, request.getRequestId(), request.getServiceName(),
                 request.getMethodName(), response.getRequestId());
-    }
-
-    private static class ClientNettyHandler extends ChannelInboundHandlerAdapter {
-        private Object res;
-
-        @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            this.res = msg;
-        }
-
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            super.exceptionCaught(ctx, cause);
-        }
-
-        public Object getRes() {
-            return res;
-        }
     }
 }

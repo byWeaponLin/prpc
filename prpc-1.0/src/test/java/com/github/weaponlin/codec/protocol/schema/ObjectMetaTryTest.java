@@ -1,9 +1,8 @@
-package com.github.weaponlin.codec.schema;
+package com.github.weaponlin.codec.protocol.schema;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

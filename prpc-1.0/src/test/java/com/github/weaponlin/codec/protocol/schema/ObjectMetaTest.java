@@ -1,6 +1,5 @@
-package com.github.weaponlin.codec.schema;
+package com.github.weaponlin.codec.protocol.schema;
 
-import com.github.weaponlin.codec.DataType;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;

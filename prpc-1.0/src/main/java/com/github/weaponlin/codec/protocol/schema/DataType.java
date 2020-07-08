@@ -1,4 +1,4 @@
-package com.github.weaponlin.codec;
+package com.github.weaponlin.codec.protocol.schema;
 
 
 import com.google.common.collect.ImmutableMap;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@Deprecated
 @AllArgsConstructor
 public enum DataType {
 

@@ -1,6 +1,5 @@
-package com.github.weaponlin.codec.schema;
+package com.github.weaponlin.codec.protocol.schema;
 
-import com.github.weaponlin.codec.DataType;
 import com.github.weaponlin.exception.PException;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -10,12 +9,13 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.github.weaponlin.codec.DataType.*;
+import static com.github.weaponlin.codec.protocol.schema.DataType.*;
 import static java.util.stream.Collectors.toList;
 
 /**
  * TODO
  */
+@Deprecated
 public class ObjectMeta {
 
     public static final int EXCEPT_FIELD_MODIFIER = Modifier.STATIC | Modifier.FINAL | Modifier.TRANSIENT | Modifier.VOLATILE;

@@ -1,12 +1,12 @@
-package com.github.weaponlin.codec.schema;
+package com.github.weaponlin.codec.protocol.schema;
 
-import com.github.weaponlin.codec.DataType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.List;
 
+@Deprecated
 @Data
 @Builder
 @Accessors(chain = true)
