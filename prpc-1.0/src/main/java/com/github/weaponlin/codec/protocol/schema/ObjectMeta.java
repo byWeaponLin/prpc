@@ -1,6 +1,6 @@
 package com.github.weaponlin.codec.protocol.schema;
 
-import com.github.weaponlin.exception.PException;
+import com.github.weaponlin.exception.PRpcException;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -24,7 +24,7 @@ public class ObjectMeta {
     public static Schema readObjectMeta(String fieldName, Class<?> typeClass, int fieldNumber) {
 
         if (typeClass == null) {
-            throw new PException("typeClass is null");
+            throw new PRpcException("typeClass is null");
         }
 
         final DataType dataType = getDataType(typeClass);

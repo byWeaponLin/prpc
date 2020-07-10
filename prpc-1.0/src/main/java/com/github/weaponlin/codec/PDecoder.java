@@ -34,6 +34,7 @@ public class PDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        // TODO get codec with config
         final PCodec codec = CodecFactory.getCodec(protocolType);
         final int bytesLen = in.readableBytes();
 

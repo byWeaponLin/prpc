@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @Builder
@@ -21,4 +22,9 @@ public class PRequest implements Serializable {
     private String methodName;
 
     private Object[] params;
+
+    /**
+     * TODO
+     */
+    private Map<String, Object> attachments;
 }

@@ -8,7 +8,8 @@ import com.github.weaponlin.client.PRequest;
 public class PServerRequestor implements PRequestor {
 
     @Override
-    public void request(PRequest request) {
-
+    public Object request(PRequest request) {
+        // TODO
+        return null;
     }
 }

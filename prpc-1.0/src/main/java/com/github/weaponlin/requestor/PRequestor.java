@@ -7,5 +7,5 @@ import com.github.weaponlin.client.PRequest;
  */
 public interface PRequestor {
 
-    void request(PRequest request);
+    Object request(PRequest request);
 }

@@ -30,6 +30,7 @@ public class PEncoder extends MessageToByteEncoder {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+        // TODO get codec with config
         final PCodec codec = CodecFactory.getCodec(protocolType);
         final byte[] encodedBytes = codec.encode(msg);
         out.writeBytes(encodedBytes);
