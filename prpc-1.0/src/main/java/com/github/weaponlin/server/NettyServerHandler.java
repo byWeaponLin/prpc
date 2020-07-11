@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
-    private Map<String, Object> cachedInstances = new ConcurrentHashMap<>();
+    private static Map<String, Object> cachedInstances = new ConcurrentHashMap<>();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

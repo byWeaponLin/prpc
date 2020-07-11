@@ -25,9 +25,12 @@ public class NettyServer {
 
     private PEncoder pEncoder;
 
+    private NettyServerHandler nettyServerHandler;
+
     public NettyServer(int port) {
         this.port = port;
         this.pEncoder = new PEncoder(PResponse.class);
+        this.nettyServerHandler = new NettyServerHandler();
     }
 
     public void start() {
@@ -55,7 +58,7 @@ public class NettyServer {
                             pipeline.addLast(new PDecoder(PRequest.class));
 
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline
-                            pipeline.addLast(new NettyServerHandler());
+                            pipeline.addLast(nettyServerHandler);
                         }
                     });
             // 这里同步等待future的返回，若返回失败，那么抛出异常

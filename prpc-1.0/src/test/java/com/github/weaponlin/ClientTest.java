@@ -17,8 +17,8 @@ public class ClientTest {
         int size;
         while ((size = scanner.nextInt()) > 0) {
             long start = System.currentTimeMillis();
-            final HelloResponse response = helloApi.hello(1L, HelloRequest.builder().size(size).build());
-            System.out.println("cost: " + (System.currentTimeMillis() - start) + ", response: " + response);
+            helloApi.hello(1L, HelloRequest.builder().size(size).build());
+            System.out.println("cost: " + (System.currentTimeMillis() - start));
         }
         System.out.println("done");
     }
