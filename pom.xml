@@ -57,6 +57,12 @@
             <version>1.7.24</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.24</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-core</artifactId>
             <version>1.6.0</version>
@@ -67,6 +73,12 @@
             <artifactId>protostuff-runtime</artifactId>
             <version>1.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
