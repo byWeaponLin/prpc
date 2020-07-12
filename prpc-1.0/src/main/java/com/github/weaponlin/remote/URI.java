@@ -1,9 +1,11 @@
 package com.github.weaponlin.remote;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
+@EqualsAndHashCode
 public class URI {
 
     private String host;

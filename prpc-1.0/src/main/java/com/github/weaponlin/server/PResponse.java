@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @Builder
@@ -19,4 +20,6 @@ public class PResponse implements Serializable {
     private Object exception;
 
     private Object result;
+
+    private Map<String, Object> attachments;
 }

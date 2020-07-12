@@ -3,6 +3,11 @@ package com.github.weaponlin.server;
 import com.github.weaponlin.client.PRequest;
 import com.github.weaponlin.codec.PDecoder;
 import com.github.weaponlin.codec.PEncoder;
+import com.github.weaponlin.config.PRPCConfig;
+import com.github.weaponlin.exception.PRpcException;
+import com.github.weaponlin.registry.Registry;
+import com.github.weaponlin.registry.ZooKeeperRegistry;
+import com.github.weaponlin.utils.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -18,6 +23,10 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
+import static com.github.weaponlin.config.PRPCConfig.*;
+
 @Slf4j
 public class NettyServer {
 
@@ -27,13 +36,45 @@ public class NettyServer {
 
     private NettyServerHandler nettyServerHandler;
 
-    public NettyServer(int port) {
+    /**
+     * temporary
+     */
+    private RegistryProperties registryProperties;
+
+    private List<Class<?>> serviceList;
+
+    private Registry registry;
+
+    public NettyServer(int port, RegistryProperties registryProperties) {
+        this(port, registryProperties, null);
+    }
+
+    public NettyServer(int port, RegistryProperties registryProperties, List<Class<?>> serviceList) {
         this.port = port;
         this.pEncoder = new PEncoder(PResponse.class);
         this.nettyServerHandler = new NettyServerHandler();
+        this.registryProperties = registryProperties;
+        this.serviceList = serviceList;
+        this.registry = new ZooKeeperRegistry(port, serviceList, registryProperties);
     }
 
     public void start() {
+        registerService();
+        startService();
+        log.info("server start successfully, host: {}, port: {}", NetUtils.getLocalHost(), port);
+    }
+
+    /**
+     * TODO register service
+     */
+    private void registerService() {
+        registry.register();
+    }
+
+    /**
+     * start service
+     */
+    private void startService() {
         // 创建主从EventLoopGroup
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -67,6 +108,7 @@ public class NettyServer {
             future.channel().closeFuture().sync();
         } catch (Exception e) {
             log.error("server start failed", e);
+            throw new PRpcException("server start failed", e);
         } finally {
             // 最后记得主从group要优雅停机。
             bossGroup.shutdownGracefully();

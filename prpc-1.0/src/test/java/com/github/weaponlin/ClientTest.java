@@ -4,13 +4,15 @@ import com.github.weaponlin.api.HelloApi;
 import com.github.weaponlin.api.HelloRequest;
 import com.github.weaponlin.api.HelloResponse;
 import com.github.weaponlin.client.PClientFactory;
+import com.github.weaponlin.config.PRPCConfig;
 
 import java.util.Scanner;
 
 public class ClientTest {
 
     public static void main(String[] args) {
-        final HelloApi helloApi = PClientFactory.getService(HelloApi.class);
+        final PRPCConfig.RegistryProperties registryProperties = new PRPCConfig.RegistryProperties().setHost("127.0.0.1:2181").setTimeout(3000).setGroup("demo").setPath("");
+        final HelloApi helloApi = PClientFactory.getService(HelloApi.class, registryProperties);
 
         Scanner scanner = new Scanner(System.in);
         // TODO if size = 2222222 then client get response is null
