@@ -39,7 +39,7 @@ abstract class PAbstractCluster implements PCluster {
 
     Object doRequest(PRequest request) {
         // load balance
-        final URI uri = loadBalancer.select();
+        final URI uri = loadBalancer.select(request.getServiceName());
         if (uri == null) {
             throw new PRpcException("can't select a server from load balancer");
         }

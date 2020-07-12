@@ -25,4 +25,14 @@ public class URI {
         uri.setPort(port);
         return uri;
     }
+
+    /**
+     *
+     * @param provider like: 127.0.0.1:8818
+     * @return
+     */
+    public static URI newURI(String provider) {
+        String[] split = provider.split(":");
+        return newURI(split[0], Integer.valueOf(split[1]));
+    }
 }

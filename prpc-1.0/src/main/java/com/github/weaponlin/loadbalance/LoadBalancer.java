@@ -7,5 +7,5 @@ import com.github.weaponlin.remote.URI;
  */
 public interface LoadBalancer {
 
-    URI select();
+    URI select(String service);
 }

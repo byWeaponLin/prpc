@@ -2,6 +2,7 @@ package com.github.weaponlin.registry;
 
 import com.github.weaponlin.config.PRPCConfig;
 import com.github.weaponlin.exception.PRpcException;
+import com.github.weaponlin.remote.URI;
 import com.github.weaponlin.utils.NetUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -74,7 +75,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
                     zooKeeper.create(path, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
                 String providerInfo = NetUtils.getLocalHost() + ":" + port;
-                zooKeeper.create(path + "/" + service.getName(), providerInfo.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+                zooKeeper.create(path + "/" + service.getName() + ":", providerInfo.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
                 log.info("register service [{}] success, provider info: {}", service.getName(), providerInfo);
             } catch (KeeperException | InterruptedException e) {
                 log.error("register service [{}] failed", service.getName(), e);
@@ -90,10 +91,10 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void subscribe() {
         // TODO
+        clientInit();
         try {
             String basePath = PROVIDER_PATH + "/" + registryProperties.getGroup();
             zooKeeper.addWatch(basePath, watchedEvent -> {
-                final String path = watchedEvent.getPath();
                 final Watcher.Event.EventType eventType = watchedEvent.getType();
 
                 log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(), watchedEvent.getState());
@@ -109,7 +110,32 @@ public class ZooKeeperRegistry extends AbstractRegistry {
                 
             }, AddWatchMode.PERSISTENT);
         } catch (KeeperException | InterruptedException e) {
-            e.printStackTrace();
+            log.error("zk watch failed", e);
+            throw new PRpcException("zk watch failed", e);
+        }
+    }
+
+    private void clientInit() {
+        try {
+            String basePath = PROVIDER_PATH + "/" + registryProperties.getGroup();
+            List<String> children = zooKeeper.getChildren(basePath, true);
+            if (CollectionUtils.isEmpty(children)) {
+                log.warn("no providers when initializing");
+                return;
+            }
+            children.forEach(child -> {
+                try {
+                    String[] split = child.split(":");
+                    String service = split[0];
+                    String provider = new String(zooKeeper.getData(basePath + "/" + child, false, new Stat()));
+                    addProvider(service, URI.newURI(provider));
+                } catch (Exception e) {
+                    log.error("read children data failed", e);
+                }
+            });
+        } catch (KeeperException | InterruptedException e) {
+            log.error("zk watch failed", e);
+            throw new PRpcException("zk watch failed", e);
         }
     }
 

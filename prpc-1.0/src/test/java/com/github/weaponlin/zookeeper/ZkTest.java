@@ -1,12 +1,13 @@
 package com.github.weaponlin.zookeeper;
 
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -66,5 +67,20 @@ public class ZkTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test() throws IOException, KeeperException, InterruptedException {
+        ZooKeeper zk = new ZooKeeper("127.0.0.1:2181", 3000, watchedEvent -> { });
+        List<String> children = zk.getChildren("/provider/demo", true);
+        System.out.println(children);
+        children.forEach(child -> {
+            try {
+                byte[] data = zk.getData("/provider/demo/" + child, false, new Stat());
+                System.out.println(new String(data));
+            } catch (KeeperException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

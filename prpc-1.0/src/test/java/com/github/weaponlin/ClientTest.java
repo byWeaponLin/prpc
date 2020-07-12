@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class ClientTest {
 
     public static void main(String[] args) {
-        final PRPCConfig.RegistryProperties registryProperties = new PRPCConfig.RegistryProperties().setHost("127.0.0.1:2181").setTimeout(3000).setGroup("demo").setPath("");
+        final PRPCConfig.RegistryProperties registryProperties = new PRPCConfig.RegistryProperties().setHost("127.0.0.1:2181").setTimeout(30000).setGroup("demo").setPath("");
         final HelloApi helloApi = PClientFactory.getService(HelloApi.class, registryProperties);
 
         Scanner scanner = new Scanner(System.in);
