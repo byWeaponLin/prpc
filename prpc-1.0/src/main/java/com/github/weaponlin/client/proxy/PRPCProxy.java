@@ -3,6 +3,7 @@ package com.github.weaponlin.client.proxy;
 
 import com.github.weaponlin.client.PRequest;
 import com.github.weaponlin.codec.PEncoder;
+import com.github.weaponlin.config.PRPCConfig;
 import com.github.weaponlin.requestor.PClientRequestor;
 import com.github.weaponlin.requestor.PRequestor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +19,9 @@ public class PRPCProxy implements InvocationHandler {
 
     private PRequestor pRequestor;
 
-    public PRPCProxy(Class<?> klass) {
+    public PRPCProxy(Class<?> klass, PRPCConfig prpcConfig) {
         this.klass = klass;
-        this.pRequestor = new PClientRequestor();
+        this.pRequestor = new PClientRequestor(prpcConfig);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.weaponlin.config.PRPCConfig.*;
+
 /**
  * TODO
  */
@@ -34,12 +36,18 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     /**
      * TODO temporary
      */
-    private PRPCConfig.RegistryProperties registryProperties;
+    private RegistryProperties registryProperties;
 
     private ZooKeeper zooKeeper;
 
-    public ZooKeeperRegistry(int port, List<Class<?>> serviceList, PRPCConfig.RegistryProperties registryProperties) {
+    public ZooKeeperRegistry(int port, List<Class<?>> serviceList, RegistryProperties registryProperties) {
         this.port = port;
+        this.serviceList = serviceList;
+        this.registryProperties = registryProperties;
+        this.init();
+    }
+
+    public ZooKeeperRegistry(List<Class<?>> serviceList, RegistryProperties registryProperties) {
         this.serviceList = serviceList;
         this.registryProperties = registryProperties;
         this.init();

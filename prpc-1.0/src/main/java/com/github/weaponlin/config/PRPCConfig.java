@@ -9,10 +9,13 @@ import java.util.List;
  * TODO
  */
 @Data
+@Accessors(chain = true)
 public class PRPCConfig {
 
+    @Deprecated
     private String port;
 
+    @Deprecated
     private String ip;
 
     private String codec;
