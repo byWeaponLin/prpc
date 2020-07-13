@@ -5,7 +5,7 @@ import com.github.weaponlin.client.proxy.ClientHandler;
 import com.github.weaponlin.codec.PDecoder;
 import com.github.weaponlin.codec.PEncoder;
 import com.github.weaponlin.exception.PRpcException;
-import com.github.weaponlin.loadbalance.LoadBalancer;
+import com.github.weaponlin.loadbalance.LoadBalance;
 import com.github.weaponlin.remote.URI;
 import com.github.weaponlin.server.PResponse;
 import io.netty.bootstrap.Bootstrap;
@@ -28,18 +28,18 @@ abstract class PAbstractCluster implements PCluster {
 
     private static final String FORMAT = "Request requestId: %s, serviceName: %s, methodName: %s, Response requestId: %s";
 
-    private LoadBalancer loadBalancer;
+    private LoadBalance loadBalance;
 
     private PEncoder pEncoder;
 
-    PAbstractCluster(LoadBalancer loadBalancer) {
-        this.loadBalancer = loadBalancer;
+    PAbstractCluster(LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
         this.pEncoder = new PEncoder(PRequest.class);
     }
 
     Object doRequest(PRequest request) {
         // load balance
-        final URI uri = loadBalancer.select(request.getServiceName());
+        final URI uri = loadBalance.select(request.getServiceName());
         if (uri == null) {
             throw new PRpcException("can't select a server from load balancer");
         }

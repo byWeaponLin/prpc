@@ -1,7 +1,7 @@
 package com.github.weaponlin.cluster;
 
 import com.github.weaponlin.client.PRequest;
-import com.github.weaponlin.loadbalance.LoadBalancer;
+import com.github.weaponlin.loadbalance.LoadBalance;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PFailoverCluster extends PAbstractCluster {
 
-    public PFailoverCluster(LoadBalancer loadBalancer) {
-        super(loadBalancer);
+    public PFailoverCluster(LoadBalance loadBalance) {
+        super(loadBalance);
     }
 
     @Override

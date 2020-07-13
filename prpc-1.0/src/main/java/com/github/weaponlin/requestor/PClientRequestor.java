@@ -4,8 +4,9 @@ import com.github.weaponlin.client.PRequest;
 import com.github.weaponlin.cluster.PCluster;
 import com.github.weaponlin.cluster.PFailfastCluster;
 import com.github.weaponlin.config.PRPCConfig;
-import com.github.weaponlin.loadbalance.LoadBalancer;
-import com.github.weaponlin.loadbalance.TemporaryLoadBalancer;
+import com.github.weaponlin.loadbalance.LoadBalance;
+import com.github.weaponlin.loadbalance.LoadBalanceFactory;
+import com.github.weaponlin.loadbalance.TemporaryLoadBalance;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,8 +21,8 @@ public class PClientRequestor implements PRequestor {
 
     public PClientRequestor(PRPCConfig config) {
         this.config = config;
-        LoadBalancer loadBalancer = new TemporaryLoadBalancer();
-        pCluster = new PFailfastCluster(loadBalancer);
+        LoadBalance loadBalance = LoadBalanceFactory.getLoadBalacer(config.getLoadBalance());
+        pCluster = new PFailfastCluster(loadBalance);
     }
 
     /**

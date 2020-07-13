@@ -1,15 +1,15 @@
 package com.github.weaponlin.cluster;
 
 import com.github.weaponlin.client.PRequest;
-import com.github.weaponlin.loadbalance.LoadBalancer;
+import com.github.weaponlin.loadbalance.LoadBalance;
 
 /**
  * TODO
  */
 public class PFailfastCluster extends PAbstractCluster {
 
-    public PFailfastCluster(LoadBalancer loadBalancer) {
-        super(loadBalancer);
+    public PFailfastCluster(LoadBalance loadBalance) {
+        super(loadBalance);
     }
 
     @Override

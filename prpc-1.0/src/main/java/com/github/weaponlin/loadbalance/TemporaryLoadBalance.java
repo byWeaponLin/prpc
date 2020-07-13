@@ -6,7 +6,9 @@ import com.github.weaponlin.remote.URI;
 
 import java.util.Set;
 
-public class TemporaryLoadBalancer implements LoadBalancer {
+public class TemporaryLoadBalance implements LoadBalance {
+
+    public static final String name = "temp";
 
     @Override
     public URI select(String service) {

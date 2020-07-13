@@ -5,7 +5,7 @@ import com.github.weaponlin.remote.URI;
 /**
  * TODO
  */
-public interface LoadBalancer {
+public interface LoadBalance {
 
     URI select(String service);
 }
