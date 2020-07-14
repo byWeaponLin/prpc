@@ -4,7 +4,7 @@ import com.github.weaponlin.remote.URI;
 
 public class RoundRobinLoadBalance implements LoadBalance {
 
-    public static final String name = "RoundRobin";
+    public static final String NAME = "RoundRobin";
 
     @Override
     public URI select(String service) {

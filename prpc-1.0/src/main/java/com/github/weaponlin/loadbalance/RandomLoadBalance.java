@@ -4,7 +4,7 @@ import com.github.weaponlin.remote.URI;
 
 public class RandomLoadBalance implements LoadBalance {
 
-    public static final String name = "Random";
+    public static final String NAME = "Random";
 
     @Override
     public URI select(String service) {

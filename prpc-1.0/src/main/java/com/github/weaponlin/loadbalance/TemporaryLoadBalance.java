@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class TemporaryLoadBalance implements LoadBalance {
 
-    public static final String name = "temp";
+    public static final String NAME = "temp";
 
     @Override
     public URI select(String service) {

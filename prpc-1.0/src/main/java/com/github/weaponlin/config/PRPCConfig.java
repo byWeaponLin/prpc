@@ -6,7 +6,7 @@ import lombok.experimental.Accessors;
 import java.util.List;
 
 /**
- * TODO
+ * TODO global zk config
  */
 @Data
 @Accessors(chain = true)
