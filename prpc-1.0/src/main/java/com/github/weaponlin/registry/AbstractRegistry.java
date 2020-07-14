@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractRegistry implements Registry {
 
+    /**
+     * TODO V: use list
+     */
     static Map<String, Set<URI>> services = new ConcurrentHashMap<>();
 
 
