@@ -1,0 +1,19 @@
+#log4j.rootLogger=DEBUG,console,dailyFile,im
+#log4j.logger.com.github.weaponlin=DEBUG
+##log4j.additivity.org.apache=true
+## 控制台(console)
+#log4j.appender.console=org.apache.log4j.ConsoleAppender
+#log4j.appender.console.Threshold=INFO
+#log4j.appender.console.ImmediateFlush=true
+#log4j.appender.console.Target=System.err
+#log4j.appender.console.layout=org.apache.log4j.PatternLayout
+#log4j.appender.console.layout.ConversionPattern=[%-5p] %d(%r) --> [%t] %l: %m %x %n
+
+log4j.rootLogger=debug
+log4j.logger.com.github.weaponlin=debug,prpc
+log4j.appender.prpc=org.apache.log4j.ConsoleAppender
+log4j.appender.prpc.Threshold=DEBUG
+log4j.appender.prpc.ImmediateFlush=true
+log4j.appender.prpc.Target=System.out
+log4j.appender.prpc.layout=org.apache.log4j.PatternLayout
+log4j.appender.prpc.layout.ConversionPattern=[%-5p] %d(%r) --> [%t] %l: %m %x %n

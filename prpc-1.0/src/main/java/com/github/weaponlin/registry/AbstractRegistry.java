@@ -31,6 +31,12 @@ public abstract class AbstractRegistry implements Registry {
         return services.get(service);
     }
 
+    /**
+     * TODO remove it
+     * @param service
+     * @param uri
+     */
+    @Deprecated
     protected void addProvider(String service, URI uri) {
         if (services.containsKey(service)) {
             services.get(service).add(uri);
@@ -39,5 +45,9 @@ public abstract class AbstractRegistry implements Registry {
             Set<URI> uris = Sets.newHashSet(uri);
             services.put(service, uris);
         }
+    }
+
+    protected void addProvider(String service, Set<URI> uris) {
+        services.put(service, uris);
     }
 }

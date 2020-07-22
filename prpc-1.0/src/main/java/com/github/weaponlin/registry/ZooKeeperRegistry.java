@@ -9,24 +9,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.AddWatchMode;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.github.weaponlin.config.PRPCConfig.RegistryProperties;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * node structure:
  * -$rootPath (根路径)
  *        └--prpc
- *            |--com.github.weaponlin.api.HelloApi:default
+ *            |--com.github.weaponlin.api.HelloApi:default  (service_name:group)
  *            |       |-providers （服务提供者列表）
  *            |       |     |--192.168.1.100:22000
  *            |       |     |--192.168.1.110:22000
@@ -83,6 +83,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     private void init() {
         try {
             this.zooKeeper = new ZooKeeper(registryProperties.getHost(), registryProperties.getTimeout(), watchEvent -> {
+                // TODO watch event
                 log.info("watchEvent: {}", watchEvent);
             });
             // TODO self adaption '/' character for zk path
@@ -139,31 +140,53 @@ public class ZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public void subscribe() {
-        // TODO remove client init
-        clientInit();
+        refresh();
         try {
-            String basePath = PROVIDER_PATH + "/" + registryProperties.getGroup();
-            zooKeeper.addWatch(basePath, watchedEvent -> {
-                final Watcher.Event.EventType eventType = watchedEvent.getType();
+            if (CollectionUtils.isNotEmpty(serviceList)) {
 
-                log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(), watchedEvent.getState());
-                if (eventType == Watcher.Event.EventType.NodeCreated) {
+                serviceList.stream().filter(Objects::nonNull).forEach(service -> {
+                    try {
+                        String servicePath = basePath + SEPARATOR + service.getName() + ":" + registryProperties.getGroup();
+                        String providerPath = servicePath + SEPARATOR + "provider";
 
-                } else if (eventType == Watcher.Event.EventType.NodeDeleted) {
+                        zooKeeper.addWatch(providerPath, watchedEvent -> {
+                            log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(),
+                                    watchedEvent.getState());
+                            refresh();
+                        }, AddWatchMode.PERSISTENT);
+                    } catch (Exception e) {
+                        log.error("zk watch failed", e);
+                    }
+                });
 
-                } else if (eventType == Watcher.Event.EventType.NodeDataChanged) {
-
-                } else if (eventType == Watcher.Event.EventType.NodeChildrenChanged) {
-
-                }
-            }, AddWatchMode.PERSISTENT);
-        } catch (KeeperException | InterruptedException e) {
+            }
+        } catch (Exception e) {
             log.error("zk watch failed", e);
             throw new PRpcException("zk watch failed", e);
         }
     }
 
-    private void clientInit() {
+    private void discoverService(String service, List<String> serverPath) {
+        if (CollectionUtils.isEmpty(serverPath)) {
+            return;
+        }
+        final Set<URI> uris = serverPath.stream().map(URI::newURI)
+                .collect(toSet());
+        addProvider(service, uris);
+    }
+
+    @Override
+    public void unsubscribe() {
+
+    }
+
+    @Override
+    public void nodeChanged() {
+
+    }
+
+    @Override
+    public void refresh() {
         try {
             // discovery service if config
             if (CollectionUtils.isNotEmpty(serviceList)) {
@@ -189,49 +212,9 @@ public class ZooKeeperRegistry extends AbstractRegistry {
                     }
                 });
             }
-            // TODO if not config service then discovery all?
-//            String basePath = PROVIDER_PATH + "/" + registryProperties.getGroup();
-//            List<String> children = zooKeeper.getChildren(basePath, true);
-//            if (CollectionUtils.isEmpty(children)) {
-//                log.warn("no providers when initializing");
-//                return;
-//            }
-//            children.forEach(child -> {
-//                try {
-//                    String[] split = child.split(":");
-//                    String service = split[0];
-//                    String provider = new String(zooKeeper.getData(basePath + "/" + child, false, new Stat()));
-//                    addProvider(service, URI.newURI(provider));
-//                } catch (Exception e) {
-//                    log.error("read children data failed", e);
-//                }
-//            });
         } catch (Exception e) {
             log.error("zk watch failed", e);
             throw new PRpcException("zk watch failed", e);
         }
-    }
-
-    private void discoverService(String service, List<String> serverPath) {
-        if (CollectionUtils.isEmpty(serverPath)) {
-            return;
-        }
-        serverPath.forEach(server -> {
-            try {
-                addProvider(service, URI.newURI(server));
-            } catch (Exception e) {
-                log.error("read children data failed", e);
-            }
-        });
-    }
-
-    @Override
-    public void unsubscribe() {
-
-    }
-
-    @Override
-    public void nodeChanged() {
-
     }
 }

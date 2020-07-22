@@ -89,7 +89,7 @@ public class NettyServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+//                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
                             pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
                             pipeline.addLast(new LengthFieldPrepender(4));

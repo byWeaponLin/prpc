@@ -14,5 +14,8 @@ public interface Registry {
 
     void unsubscribe();
 
+    @Deprecated
     void nodeChanged();
+
+    void refresh();
 }
