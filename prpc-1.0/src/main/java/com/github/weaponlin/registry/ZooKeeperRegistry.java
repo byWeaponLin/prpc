@@ -169,6 +169,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             if (CollectionUtils.isNotEmpty(serviceList)) {
                 serviceList.stream().filter(Objects::nonNull).forEach(service -> {
                     try {
+                        // discovery services
                         String servicePath = basePath + SEPARATOR + service.getName() + ":" + registryProperties.getGroup();
                         String providerPath = servicePath + SEPARATOR + "provider";
 
@@ -176,7 +177,13 @@ public class ZooKeeperRegistry extends AbstractRegistry {
                         if (CollectionUtils.isNotEmpty(serverPath)) {
                             discoverService(service.getName(), serverPath);
                         }
+                        // register consumer
+                        String consumerPath = servicePath + SEPARATOR + "consumer";
+                        createZkPathIfNotExist(consumerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
+                        String consumer = NetUtils.getLocalHost();
+                        String consumerServerPath = consumerPath + SEPARATOR + consumer;
+                        createZkPathIfNotExist(consumerServerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                     } catch (Exception e) {
                         log.error("discovery service failed, service: {}, group: {}", service.getName(), registryProperties.getGroup());
                     }
