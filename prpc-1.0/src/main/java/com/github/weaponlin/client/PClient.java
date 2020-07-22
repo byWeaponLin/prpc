@@ -18,6 +18,10 @@ import static com.github.weaponlin.config.PRPCConfig.RegistryProperties;
 
 public class PClient {
 
+    /**
+     * TODO service group
+     */
+
     private Set<Class<?>> services;
 
     private RegistryProperties discovery;

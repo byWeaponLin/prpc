@@ -3,8 +3,8 @@ package com.github.weaponlin;
 import com.github.weaponlin.api.HelloApi;
 import com.github.weaponlin.api.HelloRequest;
 import com.github.weaponlin.client.PClient;
-import com.github.weaponlin.client.PServiceFactory;
 import com.github.weaponlin.config.PRPCConfig;
+import com.google.common.collect.Lists;
 
 import java.util.Scanner;
 
@@ -19,7 +19,9 @@ public class ClientTest {
                 .loadBalance("random")
                 .failStrategy("failfast")
                 .discovery(registryProperties)
-                .build().ready();
+                .services(Lists.newArrayList(HelloApi.class))
+                .build()
+                .ready();
         HelloApi helloApi = client.getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);
