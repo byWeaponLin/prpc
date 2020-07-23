@@ -37,6 +37,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
             log.info("receive request, request id: {}, service: {}, method: {}", request.getRequestId(),
                     request.getServiceName(), request.getMethodName());
+            // TODO cache method
             Object result = MethodUtils.invokeMethod(object, request.getMethodName(), request.getParams());
             response.setResult(result);
         } catch (Exception e) {
