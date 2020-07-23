@@ -10,9 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.weaponlin</groupId>
-    <artifactId>prpc-1.0</artifactId>
+    <artifactId>prpc-all</artifactId>
 
-    <name>prpc-1.0</name>
+    <name>prpc-all</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

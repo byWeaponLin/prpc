@@ -11,8 +11,7 @@
 
     <modules>
         <module>prpc-grpc</module>
-        <module>prpc-1.0</module>
-        <module>prpc-2.0</module>
+        <module>prpc-all</module>
     </modules>
 
     <dependencies>
