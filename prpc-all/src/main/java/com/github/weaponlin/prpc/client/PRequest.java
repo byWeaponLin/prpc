@@ -23,6 +23,8 @@ public class PRequest implements Serializable {
 
     private Object[] params;
 
+    private Class<?>[] parameterTypes;
+
     /**
      * TODO
      */

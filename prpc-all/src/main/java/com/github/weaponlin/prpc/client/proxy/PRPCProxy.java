@@ -29,6 +29,7 @@ public class PRPCProxy implements InvocationHandler {
                 .serviceName(klass.getName())
                 .methodName(method.getName())
                 .params(args)
+                .parameterTypes(method.getParameterTypes())
                 .build();
         return pRequestor.request(request);
     }

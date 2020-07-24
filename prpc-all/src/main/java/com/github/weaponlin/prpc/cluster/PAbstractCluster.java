@@ -74,6 +74,7 @@ abstract class PAbstractCluster implements PCluster {
         } finally {
             eventLoopGroup.shutdownGracefully();
         }
+        // TODO VERY IMPORTANT!!! cost many time for getting response
         final PResponse response = (PResponse) clientHandler.getRes();
         if (response == null) {
             throw new PRpcException("response is null");

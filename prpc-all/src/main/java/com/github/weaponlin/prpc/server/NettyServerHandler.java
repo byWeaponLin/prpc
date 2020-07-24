@@ -5,40 +5,30 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.reflect.MethodUtils;
-import org.reflections.Reflections;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Method;
 
 @Slf4j
 @ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
-    private static Map<String, Object> cachedInstances = new ConcurrentHashMap<>();
-
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         PRequest request = (PRequest) msg;
         PResponse response = PResponse.builder()
                 .requestId(request.getRequestId())
                 .build();
         try {
-            Object object = cachedInstances.get(request.getServiceName());
-            if (object == null) {
-                Reflections reflections = new Reflections(request.getServiceName());
-                final Class<?> apiClass = Class.forName(request.getServiceName());
-                final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
-                final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
-                object = implementationClass.getConstructor().newInstance();
-                cachedInstances.put(request.getServiceName(), object);
-            }
+            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(request.getServiceName(),
+                    request.getMethodName(), request.getParameterTypes());
 
             log.info("receive request, request id: {}, service: {}, method: {}", request.getRequestId(),
                     request.getServiceName(), request.getMethodName());
-            // TODO cache method
-            Object result = MethodUtils.invokeMethod(object, request.getMethodName(), request.getParams());
+
+            Method methodInstance = instanceAndMethod.getRight();
+            Object serviceInstance = instanceAndMethod.getKey();
+            Object result = methodInstance.invoke(serviceInstance, request.getParams());
             response.setResult(result);
         } catch (Exception e) {
             log.error("invoke service implement failed", e);
