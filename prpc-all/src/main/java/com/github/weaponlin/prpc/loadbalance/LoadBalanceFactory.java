@@ -3,6 +3,10 @@ package com.github.weaponlin.prpc.loadbalance;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * TODO remove
+ */
+@Deprecated
 public class LoadBalanceFactory {
 
     private static Map<String, LoadBalance> loadBalanceMap = new ConcurrentHashMap<>();
