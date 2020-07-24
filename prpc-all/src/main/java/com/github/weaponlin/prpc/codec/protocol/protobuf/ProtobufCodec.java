@@ -1,11 +1,13 @@
 package com.github.weaponlin.prpc.codec.protocol.protobuf;
 
 import com.github.weaponlin.prpc.codec.protocol.PCodec;
+import com.github.weaponlin.prpc.loader.Extension;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
+@Extension(name = "protobuf")
 public class ProtobufCodec<T> implements PCodec<T> {
 
     @SuppressWarnings("unchecked")

@@ -47,7 +47,8 @@ public class NettyServer {
 
     public NettyServer(int port, PRPCConfig.RegistryProperties registryProperties, List<Class<?>> serviceList) {
         this.port = port;
-        this.pEncoder = new PEncoder(PResponse.class);
+        // TODO get protocolType from configuation
+        this.pEncoder = new PEncoder(PResponse.class, "protobuf");
         this.nettyServerHandler = new NettyServerHandler();
         this.registryProperties = registryProperties;
         this.serviceList = serviceList;
@@ -92,7 +93,8 @@ public class NettyServer {
 
                             // 自定义序列化协议
                             pipeline.addLast(pEncoder);
-                            pipeline.addLast(new PDecoder(PRequest.class));
+                            // TODO get protocolType from configuration
+                            pipeline.addLast(new PDecoder(PRequest.class, "protobuf"));
 
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline
                             pipeline.addLast(nettyServerHandler);

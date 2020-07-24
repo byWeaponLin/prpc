@@ -2,6 +2,7 @@ package com.github.weaponlin.prpc.codec;
 
 import com.github.weaponlin.prpc.codec.CodecFactory.ProtocolGather;
 import com.github.weaponlin.prpc.codec.protocol.PCodec;
+import com.github.weaponlin.prpc.loader.ServiceLoader;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -34,8 +35,7 @@ public class PDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        // TODO get codec with config
-        final PCodec codec = CodecFactory.getCodec(protocolType);
+        PCodec codec = ServiceLoader.getService(PCodec.class, protocolType);
         final int bytesLen = in.readableBytes();
 
         byte[] bytes = new byte[bytesLen];

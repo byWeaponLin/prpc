@@ -14,6 +14,10 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * TODO remove it
+ */
+@Deprecated
 public class CodecFactory {
     private CodecFactory() {
     }

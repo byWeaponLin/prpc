@@ -32,7 +32,8 @@ abstract class PAbstractCluster implements PCluster {
 
     PAbstractCluster(LoadBalance loadBalance) {
         this.loadBalance = loadBalance;
-        this.pEncoder = new PEncoder(PRequest.class);
+        // TODO get protocolType from configuration
+        this.pEncoder = new PEncoder(PRequest.class, "protobuf");
     }
 
     Object doRequest(PRequest request) {
@@ -59,7 +60,8 @@ abstract class PAbstractCluster implements PCluster {
 
                             // 自定义序列化协议
                             pipeline.addLast(pEncoder);
-                            pipeline.addLast(new PDecoder(PResponse.class));
+                            // TODO get protocolType from configuration
+                            pipeline.addLast(new PDecoder(PResponse.class, "protobuf"));
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline
                             pipeline.addLast(clientHandler);
 

@@ -25,6 +25,11 @@ public class PRPCConfig {
     private String loadBalance;
 
     /**
+     * TODO
+     */
+    private String protocolType;
+
+    /**
      * TODO global registry properties
      */
 

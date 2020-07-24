@@ -2,6 +2,7 @@ package com.github.weaponlin.prpc.codec.protocol.prpc;
 
 import com.github.weaponlin.prpc.codec.protocol.schema.DataType;
 import com.github.weaponlin.prpc.codec.protocol.PCodec;
+import com.github.weaponlin.prpc.loader.Extension;
 
 /**
  * key-length-value
@@ -23,6 +24,7 @@ import com.github.weaponlin.prpc.codec.protocol.PCodec;
  *  not support data type: Map and subClass, Set and subClass
  * </p>
  */
+@Extension(name = "prpc")
 public class PRpcCodec implements PCodec {
 
     @Override
