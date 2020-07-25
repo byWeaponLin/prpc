@@ -32,6 +32,9 @@ public class PInterface {
 
     private Map<PMethod, Method> methods;
 
+    /**
+     * TODO preheat instance and methods
+     */
     private static Map<String, PInterface> cachedInstances = new ConcurrentHashMap<>();
 
     public static Pair<Object, Method> getInstanceAndMethod(String serviceName, String methodName,

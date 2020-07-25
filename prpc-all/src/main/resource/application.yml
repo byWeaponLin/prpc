@@ -1,0 +1,15 @@
+prpc:
+  zookeeper: zookeeper://127.0.0.1:2181/prpc/online
+  connection-timeout: 2000
+  cluster: failfast
+  loadBalance: roundrobin
+  codec: protobuf
+  services:
+    - group:
+        default
+      zookeeper:
+        zookeeper://127.0.0.1:2181/prpc/online
+    - group:
+        test
+      zookeeper:
+        zookeeper://127.0.0.1:2181/prpc/online
