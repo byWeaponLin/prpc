@@ -10,6 +10,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
+@Deprecated
 public class PRPCConfig {
 
     @Deprecated
@@ -39,6 +40,7 @@ public class PRPCConfig {
 
     @Data
     @Accessors(chain = true)
+    @Deprecated
     public static class RegistryProperties {
 
         /**

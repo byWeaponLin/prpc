@@ -20,8 +20,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 .requestId(request.getRequestId())
                 .build();
         try {
-            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(request.getServiceName(),
-                    request.getMethodName(), request.getParameterTypes());
+            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(request.getGroup(),
+                    request.getServiceName(), request.getMethodName(), request.getParameterTypes());
 
             log.info("receive request, request id: {}, service: {}, method: {}", request.getRequestId(),
                     request.getServiceName(), request.getMethodName());

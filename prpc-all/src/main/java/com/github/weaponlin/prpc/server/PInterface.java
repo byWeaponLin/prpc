@@ -1,16 +1,19 @@
 package com.github.weaponlin.prpc.server;
 
+import com.github.weaponlin.prpc.annotation.PRPC;
 import com.github.weaponlin.prpc.exception.PRpcException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,13 +40,16 @@ public class PInterface {
      */
     private static Map<String, PInterface> cachedInstances = new ConcurrentHashMap<>();
 
-    public static Pair<Object, Method> getInstanceAndMethod(String serviceName, String methodName,
+    public static Pair<Object, Method> getInstanceAndMethod(String group, String serviceName, String methodName,
                                                             Class<?>[] parameterTypes) {
         try {
-            PInterface pInterface = cachedInstances.get(serviceName);
+            PInterface pInterface = cachedInstances.get(serviceName + ":" + group);
             if (pInterface == null) {
                 Reflections reflections = new Reflections(serviceName);
                 final Class<?> apiClass = Class.forName(serviceName);
+                Optional.ofNullable(apiClass.getAnnotation(PRPC.class)).map(PRPC::group)
+                        .filter(g -> StringUtils.equals(g, group))
+                        .orElseThrow(() -> new PRpcException("no such group service"));
                 final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
                 final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
                 Object serviceInstance = implementationClass.getConstructor().newInstance();
@@ -53,7 +59,7 @@ public class PInterface {
                         .serviceInstance(serviceInstance)
                         .methods(new ConcurrentHashMap<>())
                         .build();
-                cachedInstances.put(serviceName, pInterface);
+                cachedInstances.put(serviceName + ":" + group, pInterface);
             }
             return pInterface.getInstanceAndMethod(methodName, parameterTypes);
         } catch (Exception e) {

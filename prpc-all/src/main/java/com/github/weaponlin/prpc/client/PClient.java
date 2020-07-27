@@ -1,113 +1,115 @@
 package com.github.weaponlin.prpc.client;
 
-import com.github.weaponlin.prpc.config.PRPCConfig;
+import com.github.weaponlin.prpc.annotation.PRPC;
+import com.github.weaponlin.prpc.config.PConfig;
+import com.github.weaponlin.prpc.exception.PRpcException;
 import com.github.weaponlin.prpc.registry.Registry;
 import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.github.weaponlin.prpc.config.PRPCConfig.RegistryProperties;
 
 public class PClient {
 
-    /**
-     * TODO service group
-     */
-
-    private Set<Class<?>> services;
-
-    private RegistryProperties discovery;
-
     private Map<Class<?>, Object> serviceInstances = new ConcurrentHashMap<>();
 
-    private PRPCConfig prpcConfig;
+    private PConfig config;
 
-    private PClient() {
-    }
+    private Map<String, GroupRegistry> groupZookeeper;
 
-    private PClient(Set<Class<?>> services, String codec, String failStrategy,
-                    String loadBalance, RegistryProperties discovery) {
-        this.services = services;
-        this.discovery = discovery;
-        this.prpcConfig = new PRPCConfig().setCodec(codec)
-                .setFailStrategy(failStrategy)
-                .setLoadBalance(loadBalance);
-    }
+    private Map<String, Registry> registryMap;
 
-    public static PClientBuilder builder() {
-        return new PClientBuilder();
+    public PClient(PConfig config) {
+        this.groupZookeeper = new ConcurrentHashMap<>();
+        this.registryMap = new ConcurrentHashMap<>();
+        configValidate(config);
+        this.config = config;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getService(Class<T> clazz) {
-        if (!serviceInstances.containsKey(clazz)) {
-            serviceInstances.putIfAbsent(clazz, PServiceFactory.getService(clazz, prpcConfig));
+    public synchronized <T> T getService(@NonNull Class<T> service) {
+        final PRPC prpc = service.getAnnotation(PRPC.class);
+        if (prpc == null || StringUtils.isBlank(prpc.group())) {
+            throw new PRpcException("class must annotate with @PRPC or group cant be blank");
         }
-        return (T) serviceInstances.get(clazz);
+
+        if (!serviceInstances.containsKey(service)) {
+            final Registry registry = getRegistry(prpc.group());
+            registry.subscribe(service);
+            serviceInstances.putIfAbsent(service, PServiceFactory.getService(service, config));
+        }
+        return (T) serviceInstances.get(service);
     }
 
-    public PClient ready() {
-        Registry registry = new ZooKeeperRegistry(Lists.newArrayList(services), discovery);
-        registry.subscribe();
-        return this;
+    private Registry getRegistry(String group) {
+        if (!groupZookeeper.containsKey(group) && StringUtils.isBlank(config.getZookeeper())) {
+            throw new PRpcException("cant find zookeeper for group " + group);
+        }
+        groupZookeeper.putIfAbsent(group, new GroupRegistry(config.getZookeeper()));
+        GroupRegistry groupRegistry = groupZookeeper.get(group);
+        final String registryAddress = groupRegistry.getAddress();
+        if (registryMap.containsKey(registryAddress)) {
+            return registryMap.get(registryAddress);
+        } else {
+            Registry registry = new ZooKeeperRegistry(0, registryAddress, 30000);
+            registryMap.put(registryAddress, registry);
+            return registry;
+        }
     }
 
-    public static class PClientBuilder {
-        private Set<Class<?>> services = Sets.newHashSet();
+    /**
+     * TODO refactor, consider
+     *
+     * @param config
+     */
+    private void configValidate(PConfig config) {
+        if (config == null) {
+            throw new PRpcException("config cant be null");
+        }
 
-        private String codec;
+        if (StringUtils.isBlank(config.getZookeeper())) {
 
-        private String failStrategy;
-
-        private String loadBalance;
-
-        private RegistryProperties discovery;
-
-        public PClientBuilder services(List<Class<?>> services) {
-            if (CollectionUtils.isNotEmpty(services)) {
-                this.services.addAll(services);
+            if (CollectionUtils.isEmpty(config.getGroups())) {
+                throw new PRpcException("no valid zookeeper configuration");
             }
-            return this;
-        }
 
-        public PClientBuilder services(Class<?>... services) {
-            if (ArrayUtils.isNotEmpty(services)) {
-                this.services.addAll(Arrays.asList(services));
+            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
+                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                Optional.ofNullable(group.getZookeeper()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("invalid zookeeper configuration"));
+                groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(group.getZookeeper()));
+            });
+        } else {
+            if (CollectionUtils.isEmpty(config.getGroups())) {
+                return;
             }
-            return this;
+            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
+                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                if (StringUtils.isNotBlank(group.getZookeeper())) {
+                    groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(group.getZookeeper()));
+                } else {
+                    groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(config.getZookeeper()));
+                }
+            });
         }
+    }
 
-        public PClientBuilder codec(String codec) {
-            this.codec = codec;
-            return this;
-        }
+    @Getter
+    @Setter
+    public static class GroupRegistry {
+        private String address;
 
-        public PClientBuilder failStrategy(String failStrategy) {
-            this.failStrategy = failStrategy;
-            return this;
-        }
-
-        public PClientBuilder loadBalance(String loadBalance) {
-            this.loadBalance = loadBalance;
-            return this;
-        }
-
-        public PClientBuilder discovery(RegistryProperties discovery) {
-            this.discovery = discovery;
-            return this;
-        }
-
-        public PClient build() {
-            return new PClient(services, codec,
-                    failStrategy, loadBalance, discovery);
+        public GroupRegistry(String address) {
+            this.address = address;
         }
     }
 }

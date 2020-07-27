@@ -8,9 +8,13 @@ public interface Registry {
 
     void register();
 
+    void register(Class<?> service);
+
     void unregister();
 
     void subscribe();
+
+    void subscribe(Class<?> service);
 
     void unsubscribe();
 

@@ -1,13 +1,16 @@
 package com.github.weaponlin.prpc.server;
 
+import com.github.weaponlin.prpc.annotation.PRPC;
+import com.github.weaponlin.prpc.client.PClient;
 import com.github.weaponlin.prpc.client.PRequest;
 import com.github.weaponlin.prpc.codec.PDecoder;
 import com.github.weaponlin.prpc.codec.PEncoder;
-import com.github.weaponlin.prpc.config.PRPCConfig;
+import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.exception.PRpcException;
+import com.github.weaponlin.prpc.registry.Registry;
 import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
 import com.github.weaponlin.prpc.utils.NetUtils;
-import com.github.weaponlin.prpc.registry.Registry;
+import com.google.common.collect.Lists;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -20,8 +23,14 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class NettyServer {
@@ -32,40 +41,61 @@ public class NettyServer {
 
     private NettyServerHandler nettyServerHandler;
 
-    /**
-     * temporary
-     */
-    private PRPCConfig.RegistryProperties registryProperties;
+    private Map<String, PClient.GroupRegistry> groupZookeeper = new ConcurrentHashMap<>();
 
-    private List<Class<?>> serviceList;
+    private Map<String, Registry> registryMap = new ConcurrentHashMap<>();
 
-    private Registry registry;
+    private PConfig config;
 
-    public NettyServer(int port, PRPCConfig.RegistryProperties registryProperties) {
-        this(port, registryProperties, null);
-    }
+    private List<Class<?>> services = Lists.newArrayList();
 
-    public NettyServer(int port, PRPCConfig.RegistryProperties registryProperties, List<Class<?>> serviceList) {
+    public NettyServer(int port, PConfig config) {
         this.port = port;
-        // TODO get protocolType from configuation
-        this.pEncoder = new PEncoder(PResponse.class, "protobuf");
+        configValidate(config);
+        this.config = config;
+        this.pEncoder = new PEncoder(PResponse.class, config.getCodec());
         this.nettyServerHandler = new NettyServerHandler();
-        this.registryProperties = registryProperties;
-        this.serviceList = serviceList;
-        this.registry = new ZooKeeperRegistry(port, serviceList, registryProperties);
     }
 
-    public void start() {
+    public NettyServer addService(Class<?> service) {
+        final PRPC prpc = service.getAnnotation(PRPC.class);
+        if (prpc == null || StringUtils.isBlank(prpc.group())) {
+            throw new PRpcException("class must annotate with @PRPC or group cant be blank");
+        }
+        final String group = prpc.group();
+        if (!groupZookeeper.containsKey(group) && StringUtils.isBlank(config.getZookeeper())) {
+            throw new PRpcException("cant find zookeeper for group " + group);
+        }
+        groupZookeeper.putIfAbsent(group, new PClient.GroupRegistry(config.getZookeeper()));
+        final PClient.GroupRegistry groupRegistry = groupZookeeper.get(group);
+        if (!registryMap.containsKey(groupRegistry.getAddress())) {
+            ZooKeeperRegistry registry = new ZooKeeperRegistry(port, groupRegistry.getAddress(), config.getConnectionTimeout());
+            registryMap.putIfAbsent(groupRegistry.getAddress(), registry);
+        }
+
+        services.add(service);
+        return this;
+    }
+
+    public NettyServer addService(List<Class<?>> services) {
+        Optional.ofNullable(services).filter(CollectionUtils::isNotEmpty)
+                .ifPresent(list -> list.forEach(this::addService));
+        return this;
+    }
+
+    public synchronized void start() {
         registerService();
         startService();
         log.info("server start successfully, host: {}, port: {}", NetUtils.getLocalHost(), port);
     }
 
-    /**
-     * TODO register service
-     */
     private void registerService() {
-        registry.register();
+        services.forEach(service -> {
+            final PRPC prpc = service.getAnnotation(PRPC.class);
+            String group = prpc.group();
+            Registry registry = registryMap.get(groupZookeeper.get(group).getAddress());
+            registry.register(service);
+        });
     }
 
     /**
@@ -111,6 +141,40 @@ public class NettyServer {
             // 最后记得主从group要优雅停机。
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+        }
+    }
+
+    private void configValidate(PConfig config) {
+        if (config == null) {
+            throw new PRpcException("config cant be null");
+        }
+
+        if (StringUtils.isBlank(config.getZookeeper())) {
+
+            if (CollectionUtils.isEmpty(config.getGroups())) {
+                throw new PRpcException("no valid zookeeper configuration");
+            }
+
+            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
+                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                Optional.ofNullable(group.getZookeeper()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("invalid zookeeper configuration"));
+                groupZookeeper.putIfAbsent(group.getGroup(), new PClient.GroupRegistry(group.getZookeeper()));
+            });
+        } else {
+            if (CollectionUtils.isEmpty(config.getGroups())) {
+                return;
+            }
+            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
+                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
+                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                if (StringUtils.isNotBlank(group.getZookeeper())) {
+                    groupZookeeper.putIfAbsent(group.getGroup(), new PClient.GroupRegistry(group.getZookeeper()));
+                } else {
+                    groupZookeeper.putIfAbsent(group.getGroup(), new PClient.GroupRegistry(config.getZookeeper()));
+                }
+            });
         }
     }
 }

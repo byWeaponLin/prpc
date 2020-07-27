@@ -3,7 +3,7 @@ package com.github.weaponlin.prpc.requestor;
 import com.github.weaponlin.prpc.client.PRequest;
 import com.github.weaponlin.prpc.cluster.PCluster;
 import com.github.weaponlin.prpc.cluster.PFailfastCluster;
-import com.github.weaponlin.prpc.config.PRPCConfig;
+import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.loadbalance.LoadBalance;
 import com.github.weaponlin.prpc.loader.ServiceLoader;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +16,12 @@ public class PClientRequestor implements PRequestor {
 
     private PCluster pCluster;
 
-    private PRPCConfig config;
+    private PConfig config;
 
-    public PClientRequestor(PRPCConfig config) {
+    public PClientRequestor(PConfig config) {
         this.config = config;
-//        LoadBalance loadBalance = LoadBalanceFactory.getLoadBalacer(config.getLoadBalance());
         LoadBalance loadBalance = ServiceLoader.getService(LoadBalance.class, config.getLoadBalance());
+        // TODO replace by ServiceLoader
         pCluster = new PFailfastCluster(loadBalance);
     }
 

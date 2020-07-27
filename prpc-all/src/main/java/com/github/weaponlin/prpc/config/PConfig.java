@@ -1,10 +1,14 @@
 package com.github.weaponlin.prpc.config;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PConfig {
 
     /**
@@ -15,23 +19,25 @@ public class PConfig {
     /**
      * unit: milliseconds
      */
-    private int connectionTimeout;
+    private int connectionTimeout = 30000;
 
     /**
      * fault tolerant of cluster
+     * optional: failfast, failover
      */
-    private String cluster;
+    private String cluster = "failfast";
 
     /**
      * load balance
+     * optional: random, roundrobin
      */
-    private String loadBalance;
+    private String loadBalance = "random";
 
     /**
      * data encode&decode
-     * optional:
+     * optional: protobuf, json and so on
      */
-    private String codec;
+    private String codec = "protobuf";
 
     /**
      * service groups configuration
@@ -39,7 +45,10 @@ public class PConfig {
     private List<PGroup> groups;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class PGroup {
+
         /**
          * service group
          */
@@ -50,6 +59,6 @@ public class PConfig {
          */
         private String zookeeper;
 
-        private int connectionTimeout;
+        private int connectionTimeout = 30000;
     }
 }
