@@ -3,11 +3,14 @@ package com.github.weaponlin.prpc.api;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class HelloRequest implements Serializable {
 
     private static final long serialVersionUID = 2427707179124125575L;
