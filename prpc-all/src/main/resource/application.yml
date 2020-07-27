@@ -4,7 +4,7 @@ prpc:
   cluster: failfast
   loadBalance: roundrobin
   codec: protobuf
-  services:
+  groups:
     - group:
         default
       zookeeper:
