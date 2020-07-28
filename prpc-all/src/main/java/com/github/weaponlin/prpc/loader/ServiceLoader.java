@@ -15,6 +15,9 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class ServiceLoader {
 
+    /**
+     * TODO preheat
+     */
     private static Map<Class<?>, Service<?>> loaders = new ConcurrentHashMap<>();
 
     public synchronized static <T> T getService(@NonNull Class<T> clazz, String extensionName) {

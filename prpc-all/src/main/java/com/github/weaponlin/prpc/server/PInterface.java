@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 @Slf4j
 @Data
@@ -85,6 +86,40 @@ public class PInterface {
         }
     }
 
+    private void registerMethods() {
+        Stream.of(serviceClass.getDeclaredMethods()).forEach(method -> {
+            PMethod pMethod = PMethod.newMethod(method.getName(), method.getParameterTypes());
+            methods.putIfAbsent(pMethod, method);
+            log.info("register method success, method: {}, service: {}", method.getName(), serviceName);
+        });
+    }
+
+    public synchronized static void registerInterface(String group, Class<?> service) {
+        String key = service.getName() + ":" + group;
+        if (cachedInstances.containsKey(key)) {
+            return;
+        }
+        Reflections reflections = new Reflections(service);
+
+        try {
+            // initialize api
+            final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) service);
+            final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
+            Object serviceInstance = implementationClass.getConstructor().newInstance();
+            final PInterface pInterface = PInterface.builder()
+                    .serviceName(service.getName())
+                    .serviceClass(service)
+                    .serviceInstance(serviceInstance)
+                    .methods(new ConcurrentHashMap<>())
+                    .build();
+            cachedInstances.put(key, pInterface);
+            log.info("register service instance success, service: {}, group: {}", service.getName(), group);
+            // initialize methods
+            pInterface.registerMethods();
+        } catch (Exception e) {
+            throw new PRpcException("register server interface failed");
+        }
+    }
 
 
     @AllArgsConstructor

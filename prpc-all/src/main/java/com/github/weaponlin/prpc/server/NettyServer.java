@@ -72,7 +72,7 @@ public class NettyServer {
             ZooKeeperRegistry registry = new ZooKeeperRegistry(port, groupRegistry.getAddress(), config.getConnectionTimeout());
             registryMap.putIfAbsent(groupRegistry.getAddress(), registry);
         }
-
+        PInterface.registerInterface(group, service);
         services.add(service);
         return this;
     }
