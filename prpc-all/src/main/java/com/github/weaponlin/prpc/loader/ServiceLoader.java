@@ -1,6 +1,9 @@
 package com.github.weaponlin.prpc.loader;
 
+import com.github.weaponlin.prpc.codec.protocol.PCodec;
 import com.github.weaponlin.prpc.exception.PRpcException;
+import com.github.weaponlin.prpc.loadbalance.LoadBalance;
+import com.google.common.collect.Lists;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,10 +18,40 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class ServiceLoader {
 
-    /**
-     * TODO preheat
-     */
     private static Map<Class<?>, Service<?>> loaders = new ConcurrentHashMap<>();
+
+    private static List<Class<?>> preparedService = Lists.newArrayList(
+            LoadBalance.class, PCodec.class
+    );
+
+
+    static {
+        /**
+         * preheat
+         */
+        preparedService.forEach(clazz -> {
+            try {
+                Reflections reflections = new Reflections(clazz);
+                final List<Class<?>> candidates = reflections.getSubTypesOf(clazz)
+                        .stream()
+                        .filter(c -> c.getDeclaredAnnotation(Extension.class) != null)
+                        .collect(toList());
+                final Service<?> service = new Service<>(candidates);
+                loaders.put(clazz, service);
+                candidates.forEach(candidate -> {
+                    try {
+                        Extension extension = candidate.getDeclaredAnnotation(Extension.class);
+                        service.loadService(extension.name());
+                        log.info("load service candidate: {} success, extension name: {}", candidate.getName(), extension.name());
+                    } catch (Exception e) {
+                        log.error("load failed, candidate: {}", candidate.getName(), e);
+                    }
+                });
+            } catch (Exception e) {
+                log.error("load service failed, service: {}", clazz.getName());
+            }
+        });
+    }
 
     public synchronized static <T> T getService(@NonNull Class<T> clazz, String extensionName) {
         if (!clazz.isInterface()) {
