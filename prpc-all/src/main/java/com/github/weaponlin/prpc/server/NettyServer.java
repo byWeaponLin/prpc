@@ -50,6 +50,11 @@ public class NettyServer {
 
     private List<Class<?>> services = Lists.newArrayList();
 
+    /**
+     * TODO remove port from constructor
+     * @param port
+     * @param config
+     */
     public NettyServer(int port, PConfig config) {
         this.port = port;
         configValidate(config);
