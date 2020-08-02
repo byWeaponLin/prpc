@@ -11,6 +11,7 @@ import com.github.weaponlin.prpc.registry.Registry;
 import com.github.weaponlin.prpc.registry.RegistryFactory;
 import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
 import com.github.weaponlin.prpc.utils.NetUtils;
+import com.github.weaponlin.prpc.utils.PortUtils;
 import com.google.common.collect.Lists;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -57,6 +58,14 @@ public class NettyServer {
      */
     public NettyServer(int port, PConfig config) {
         this.port = port;
+        configValidate(config);
+        this.config = config;
+        this.pEncoder = new PEncoder(PResponse.class, config.getCodec());
+        this.nettyServerHandler = new NettyServerHandler();
+    }
+
+    public NettyServer(PConfig config) {
+        this.port = PortUtils.getAvailablePort();
         configValidate(config);
         this.config = config;
         this.pEncoder = new PEncoder(PResponse.class, config.getCodec());
