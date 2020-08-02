@@ -12,9 +12,14 @@ import java.util.List;
 public class PConfig {
 
     /**
+     * optional: none, zookeeper and othe will support in the future
+     */
+    private String registry;
+
+    /**
      * global zookeeper address and path, eg: zookeeper://127.0.0.1:2181/prpc
      */
-    private String zookeeper;
+    private String address;
 
     /**
      * unit: milliseconds
@@ -57,7 +62,7 @@ public class PConfig {
         /**
          * zookeeper address of a specified group, if null or blank then will use the global zookeeper
          */
-        private String zookeeper;
+        private String address;
 
         private int connectionTimeout = 30000;
     }

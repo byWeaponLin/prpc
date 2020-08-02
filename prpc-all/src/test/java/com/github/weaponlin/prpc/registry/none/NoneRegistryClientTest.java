@@ -1,9 +1,11 @@
-package com.github.weaponlin.prpc;
+package com.github.weaponlin.prpc.registry.none;
 
 import com.github.weaponlin.prpc.api.HelloApi;
 import com.github.weaponlin.prpc.api.HelloRequest;
 import com.github.weaponlin.prpc.client.PClient;
 import com.github.weaponlin.prpc.config.PConfig;
+import com.github.weaponlin.prpc.registry.NoneRegistry;
+import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,11 +17,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class ClientTest {
+public class NoneRegistryClientTest {
 
     public static void main(String[] args) {
         PConfig config = new PConfig();
-        config.setZookeeper("127.0.0.1:2181");
+        config.setRegistry(NoneRegistry.REGISTRY);
+        config.setAddress("127.0.0.1:50697");
         HelloApi helloApi = new PClient(config).getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);

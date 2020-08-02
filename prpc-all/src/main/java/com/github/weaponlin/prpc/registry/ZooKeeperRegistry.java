@@ -1,7 +1,6 @@
 package com.github.weaponlin.prpc.registry;
 
 import com.github.weaponlin.prpc.annotation.PRPC;
-import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.exception.PRpcException;
 import com.github.weaponlin.prpc.config.PRPCConfig;
 import com.github.weaponlin.prpc.utils.NetUtils;
@@ -47,6 +46,8 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 public class ZooKeeperRegistry extends AbstractRegistry {
 
+    public static final String REGISTRY = "zookeeper";
+
     private static final String PRPC_PATH = "/prpc";
 
     private static final String SEPARATOR = "/";
@@ -71,21 +72,6 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     private ZooKeeper zooKeeper;
 
     private String basePath;
-
-    @Deprecated
-    public ZooKeeperRegistry(int port, List<Class<?>> serviceList, PRPCConfig.RegistryProperties registryProperties) {
-        this.port = port;
-        this.serviceList = serviceList;
-        this.registryProperties = registryProperties;
-        this.init();
-    }
-
-    @Deprecated
-    public ZooKeeperRegistry(List<Class<?>> serviceList, PRPCConfig.RegistryProperties registryProperties) {
-        this.serviceList = serviceList;
-        this.registryProperties = registryProperties;
-        this.init();
-    }
 
     public ZooKeeperRegistry(int port, String address, int connectionTimeout) {
         this.port = port;

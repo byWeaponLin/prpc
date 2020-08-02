@@ -4,7 +4,7 @@ import com.github.weaponlin.prpc.annotation.PRPC;
 import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.exception.PRpcException;
 import com.github.weaponlin.prpc.registry.Registry;
-import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
+import com.github.weaponlin.prpc.registry.RegistryFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -22,12 +22,12 @@ public class PClient {
 
     private PConfig config;
 
-    private Map<String, GroupRegistry> groupZookeeper;
+    private Map<String, GroupRegistry> groupRegistry;
 
     private Map<String, Registry> registryMap;
 
     public PClient(PConfig config) {
-        this.groupZookeeper = new ConcurrentHashMap<>();
+        this.groupRegistry = new ConcurrentHashMap<>();
         this.registryMap = new ConcurrentHashMap<>();
         configValidate(config);
         this.config = config;
@@ -49,16 +49,16 @@ public class PClient {
     }
 
     private Registry getRegistry(String group) {
-        if (!groupZookeeper.containsKey(group) && StringUtils.isBlank(config.getZookeeper())) {
+        if (!groupRegistry.containsKey(group) && StringUtils.isBlank(config.getAddress())) {
             throw new PRpcException("cant find zookeeper for group " + group);
         }
-        groupZookeeper.putIfAbsent(group, new GroupRegistry(config.getZookeeper()));
-        GroupRegistry groupRegistry = groupZookeeper.get(group);
+        groupRegistry.putIfAbsent(group, new GroupRegistry(config.getAddress()));
+        GroupRegistry groupRegistry = this.groupRegistry.get(group);
         final String registryAddress = groupRegistry.getAddress();
         if (registryMap.containsKey(registryAddress)) {
             return registryMap.get(registryAddress);
         } else {
-            Registry registry = new ZooKeeperRegistry(0, registryAddress, 30000);
+            Registry registry = RegistryFactory.createRegistry(config, 0);
             registryMap.put(registryAddress, registry);
             return registry;
         }
@@ -74,7 +74,7 @@ public class PClient {
             throw new PRpcException("config cant be null");
         }
 
-        if (StringUtils.isBlank(config.getZookeeper())) {
+        if (StringUtils.isBlank(config.getAddress())) {
 
             if (CollectionUtils.isEmpty(config.getGroups())) {
                 throw new PRpcException("no valid zookeeper configuration");
@@ -83,9 +83,9 @@ public class PClient {
             config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
                 Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
                         .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
-                Optional.ofNullable(group.getZookeeper()).filter(StringUtils::isNotBlank)
+                Optional.ofNullable(group.getAddress()).filter(StringUtils::isNotBlank)
                         .orElseThrow(() -> new PRpcException("invalid zookeeper configuration"));
-                groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(group.getZookeeper()));
+                groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(group.getAddress()));
             });
         } else {
             if (CollectionUtils.isEmpty(config.getGroups())) {
@@ -94,10 +94,10 @@ public class PClient {
             config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
                 Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
                         .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
-                if (StringUtils.isNotBlank(group.getZookeeper())) {
-                    groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(group.getZookeeper()));
+                if (StringUtils.isNotBlank(group.getAddress())) {
+                    groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(group.getAddress()));
                 } else {
-                    groupZookeeper.putIfAbsent(group.getGroup(), new GroupRegistry(config.getZookeeper()));
+                    groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(config.getAddress()));
                 }
             });
         }
