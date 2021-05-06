@@ -46,7 +46,7 @@ public class NoneRegistry extends AbstractRegistry {
 
     @Override
     public void unregister() {
-        throw new PRpcException("not support operation");
+        return;
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.github.weaponlin.prpc.config.PRPCConfig;
 import com.github.weaponlin.prpc.utils.NetUtils;
 import com.github.weaponlin.prpc.remote.URI;
 import com.google.common.collect.Lists;
+import io.netty.util.NetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -165,7 +166,21 @@ public class ZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public void unregister() {
-
+        groupService.forEach((group, services) -> {
+            if (CollectionUtils.isNotEmpty(services)) {
+                services.forEach(service -> {
+                    String serverPath = basePath + SEPARATOR + service.getName() + ":" + group
+                            + SEPARATOR + "provider"
+                            + SEPARATOR + NetUtils.getLocalHost() + ":" + port;
+                    try {
+                        zooKeeper.delete(serverPath, -1);
+                        log.info("unregister service [{}] success, port: {}", service.getName(), port);
+                    } catch (Exception e) {
+                        log.error("unregister service [{}] failed, port: {}", service.getName(), port);
+                    }
+                });
+            }
+        });
     }
 
     @Override

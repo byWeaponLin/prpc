@@ -9,7 +9,6 @@ import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.exception.PRpcException;
 import com.github.weaponlin.prpc.registry.Registry;
 import com.github.weaponlin.prpc.registry.RegistryFactory;
-import com.github.weaponlin.prpc.registry.ZooKeeperRegistry;
 import com.github.weaponlin.prpc.utils.NetUtils;
 import com.github.weaponlin.prpc.utils.PortUtils;
 import com.google.common.collect.Lists;
@@ -51,25 +50,43 @@ public class NettyServer {
 
     private List<Class<?>> services = Lists.newArrayList();
 
+
+    private static List<Class<?>> servicesBak;
+    private static Map<String, Registry> registryMapBak;
+    private static Map<String, PClient.GroupRegistry> groupRegistryBak;
+
+    static {
+        // TODO may be refactor
+        // add shutdown hook to unregister service
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            servicesBak.forEach(service -> {
+                final PRPC prpc = service.getAnnotation(PRPC.class);
+                String group = prpc.group();
+                Registry registry = registryMapBak.get(groupRegistryBak.get(group).getAddress());
+                registry.unregister();
+            });
+        }));
+    }
+
     /**
      * TODO remove port from constructor
      * @param port
      * @param config
      */
+    @Deprecated
     public NettyServer(int port, PConfig config) {
         this.port = port;
         configValidate(config);
         this.config = config;
         this.pEncoder = new PEncoder(PResponse.class, config.getCodec());
         this.nettyServerHandler = new NettyServerHandler();
+        servicesBak = services;
+        registryMapBak = registryMap;
+        groupRegistryBak = groupRegistry;
     }
 
     public NettyServer(PConfig config) {
-        this.port = PortUtils.getAvailablePort();
-        configValidate(config);
-        this.config = config;
-        this.pEncoder = new PEncoder(PResponse.class, config.getCodec());
-        this.nettyServerHandler = new NettyServerHandler();
+        this(PortUtils.getAvailablePort(), config);
     }
 
     public NettyServer addService(Class<?> service) {

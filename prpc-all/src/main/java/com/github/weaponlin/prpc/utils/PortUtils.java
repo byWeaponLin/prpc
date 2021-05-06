@@ -15,7 +15,7 @@ public class PortUtils {
 
     private static final String LOCAL_HOST = "127.0.0.1";
 
-    private static final int MAX_TRY_TIMES = 100;
+    private static final int MAX_TRY_TIMES = 1000;
 
     public static int getAvailablePort() {
         for (int i = 0; i < MAX_TRY_TIMES; i++) {
@@ -24,7 +24,7 @@ public class PortUtils {
                 return port;
             }
         }
-        throw new PRpcException("can't find an available port after 100 times retry");
+        throw new PRpcException("can't find an available port after 1000 times retry");
     }
 
     public static boolean isAvailable(String host, int port) {
