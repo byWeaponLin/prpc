@@ -13,3 +13,21 @@ prpc:
         test
       zookeeper:
         zookeeper://127.0.0.1:2181/prpc/online
+
+# server
+prpc1:
+  server:
+    protocol: dubbo
+    rigistry:
+      type: zookeeper
+      address: zookeeper://127.0.0.1:2181/prpc/online
+    codec: protobuf
+    package: com.weaponlin.inf.prpc.test
+  client:
+    protocol: dubbo
+    rigistry:
+      type: zookeeper
+      address: zookeeper://127.0.0.1:2181/prpc/online
+    codec: protobuf
+    loadbalance: roundrobin
+    cluster: failfast

@@ -4,14 +4,10 @@ import com.github.weaponlin.prpc.annotation.PRPC;
 import com.github.weaponlin.prpc.config.PConfig;
 import com.github.weaponlin.prpc.exception.PRpcException;
 import com.github.weaponlin.prpc.remote.URI;
-import com.github.weaponlin.prpc.utils.NetUtils;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.zookeeper.AddWatchMode;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.ZooDefs;
 
 import java.util.List;
 import java.util.Map;
