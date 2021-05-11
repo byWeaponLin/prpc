@@ -21,10 +21,11 @@ an rpc framework
     - [x] fastfail
     - [ ] fastover
 - [ ] 序列化协议
-    - [x] protobuff
+    - [x] protobuf
     - [x] json
 - [ ] 应用协议兼容
     - [ ] dubbo
+    - [ ] http
     - [ ] brpc
 - [ ] 限流
     - [ ] 计数器算法
