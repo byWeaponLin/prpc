@@ -47,7 +47,11 @@ public class ClientTest {
                     e.printStackTrace();
                 }
             }
-            System.out.println("average cost: " + (costs.stream().mapToLong(e -> e).sum() / costs.size()) + ", requests: " + costs.size());
+            try {
+                System.out.println("average cost: " + (costs.stream().mapToLong(e -> e).sum() / costs.size()) + ", requests: " + costs.size());
+            } catch (Exception e) {
+
+            }
         }
         System.out.println("done");
     }

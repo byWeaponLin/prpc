@@ -46,6 +46,7 @@ an rpc framework
 - [ ] naming service，支持命名方式解析
 - [ ] config数据结构优化，清晰一些
 - [ ] 支持多端口启动，例如服务同时需要支持dubbo和prpc协议，需要启动两个端口，分别接收请求
+- [x] prpc协议添加magic num
 
 
 ## 4 Quick Start

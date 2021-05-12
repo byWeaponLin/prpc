@@ -136,6 +136,7 @@ public class NettyServer {
      */
     private void startService() {
         // 创建主从EventLoopGroup
+        // TODO 一个协议一个端口
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
