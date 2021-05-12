@@ -1,10 +1,10 @@
 package com.github.weaponlin.prpc.codec.protocol.prpc;
 
-import com.github.weaponlin.prpc.codec.protocol.schema.DataType;
 import com.github.weaponlin.prpc.codec.protocol.PCodec;
 import com.github.weaponlin.prpc.loader.Extension;
 
 /**
+ * TODO
  * key-length-value
  * key: fix one byte, include field number and filed data type
  * length: fix 4 bytes
@@ -20,7 +20,6 @@ import com.github.weaponlin.prpc.loader.Extension;
  * </p>
  *
  * <p>
- *  support data type: {@link DataType}
  *  not support data type: Map and subClass, Set and subClass
  * </p>
  */

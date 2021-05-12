@@ -17,16 +17,34 @@ prpc:
 # server
 prpc1:
   server:
-    protocol: dubbo
+    protocol: prpc
     rigistry:
-      type: zookeeper
+      naming: zookeeper
       address: zookeeper://127.0.0.1:2181/prpc/online
     codec: protobuf
-    package: com.weaponlin.inf.prpc.test
+    package: com.weaponlin.inf.prpc.test # scan package, spring用
+    timeout: 30000
+    groups:
+      - group:
+          default
+        registry:
+          naming: zookeeper
+          address: zookeeper://127.0.0.1:2181/prpc/online
+        codec: protobuf
+        protocol: http
+        timeout: 30000
+      - group:
+          test
+        registry:
+          naming: zookeeper
+          address: zookeeper://127.0.0.1:2181/prpc/online
+        codec: json
+        protocol: dubbo
+        timeout: 30000
   client:
-    protocol: dubbo
+    protocol: prpc
     rigistry:
-      type: zookeeper
+      naming: zookeeper
       address: zookeeper://127.0.0.1:2181/prpc/online
     codec: protobuf
     loadbalance: roundrobin

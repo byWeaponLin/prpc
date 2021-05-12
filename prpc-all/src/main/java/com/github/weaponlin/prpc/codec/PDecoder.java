@@ -1,6 +1,5 @@
 package com.github.weaponlin.prpc.codec;
 
-import com.github.weaponlin.prpc.codec.CodecFactory.ProtocolGather;
 import com.github.weaponlin.prpc.codec.protocol.PCodec;
 import com.github.weaponlin.prpc.loader.ServiceLoader;
 import io.netty.buffer.ByteBuf;
@@ -20,7 +19,7 @@ public class PDecoder extends ByteToMessageDecoder {
     private Class decodeClass;
 
     /**
-     * protocol type field {@link ProtocolGather}
+     * protocol type field
      */
     private String protocolType;
 
