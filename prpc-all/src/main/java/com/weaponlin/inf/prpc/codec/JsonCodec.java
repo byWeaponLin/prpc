@@ -1,7 +1,6 @@
-package com.weaponlin.inf.prpc.codec.protocol.json;
+package com.weaponlin.inf.prpc.codec;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.weaponlin.inf.prpc.codec.protocol.PCodec;
 import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.loader.Extension;
 

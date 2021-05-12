@@ -1,4 +1,4 @@
-package com.weaponlin.inf.prpc.server;
+package com.weaponlin.inf.prpc.protocol.prpc;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,7 @@
 package com.weaponlin.inf.prpc.server;
 
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

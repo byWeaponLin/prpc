@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.requestor;
 
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.cluster.PCluster;
 import com.weaponlin.inf.prpc.cluster.PFailfastCluster;
 import com.weaponlin.inf.prpc.config.PConfig;

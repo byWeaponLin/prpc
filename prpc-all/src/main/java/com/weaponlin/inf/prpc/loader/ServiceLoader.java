@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.loader;
 
-import com.weaponlin.inf.prpc.codec.protocol.PCodec;
+import com.weaponlin.inf.prpc.codec.PCodec;
 import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.loadbalance.LoadBalance;
 import com.google.common.collect.Lists;

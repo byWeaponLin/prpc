@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.client.proxy;
 
-import com.weaponlin.inf.prpc.server.PResponse;
+import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.concurrent.Promise;

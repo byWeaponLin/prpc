@@ -2,11 +2,12 @@ package com.weaponlin.inf.prpc.server;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.client.PClient;
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.codec.PDecoder;
 import com.weaponlin.inf.prpc.codec.PEncoder;
 import com.weaponlin.inf.prpc.config.PConfig;
 import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import com.weaponlin.inf.prpc.registry.Registry;
 import com.weaponlin.inf.prpc.registry.RegistryFactory;
 import com.weaponlin.inf.prpc.utils.NetUtils;

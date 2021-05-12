@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.requestor;
 
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 
 /**
  * TODO server requestor

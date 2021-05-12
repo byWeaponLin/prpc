@@ -1,6 +1,5 @@
-package com.weaponlin.inf.prpc.codec.protocol.protobuf;
+package com.weaponlin.inf.prpc.codec;
 
-import com.weaponlin.inf.prpc.codec.protocol.PCodec;
 import com.weaponlin.inf.prpc.loader.Extension;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;

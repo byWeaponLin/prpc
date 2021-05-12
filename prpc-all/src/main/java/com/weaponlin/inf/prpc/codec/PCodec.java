@@ -1,4 +1,4 @@
-package com.weaponlin.inf.prpc.codec.protocol;
+package com.weaponlin.inf.prpc.codec;
 
 /**
  * encode and decode

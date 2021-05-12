@@ -1,6 +1,5 @@
 package com.weaponlin.inf.prpc.codec;
 
-import com.weaponlin.inf.prpc.codec.protocol.PCodec;
 import com.weaponlin.inf.prpc.loader.ServiceLoader;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

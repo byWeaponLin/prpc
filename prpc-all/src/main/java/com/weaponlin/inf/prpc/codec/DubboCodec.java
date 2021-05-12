@@ -1,6 +1,5 @@
-package com.weaponlin.inf.prpc.codec.protocol.dubbo;
+package com.weaponlin.inf.prpc.codec;
 
-import com.weaponlin.inf.prpc.codec.protocol.PCodec;
 import com.weaponlin.inf.prpc.loader.Extension;
 
 /**

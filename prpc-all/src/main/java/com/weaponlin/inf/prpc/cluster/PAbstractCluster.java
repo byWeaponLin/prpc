@@ -1,12 +1,12 @@
 package com.weaponlin.inf.prpc.cluster;
 
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.client.proxy.ClientHandler;
 import com.weaponlin.inf.prpc.codec.PDecoder;
 import com.weaponlin.inf.prpc.codec.PEncoder;
 import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.loadbalance.LoadBalance;
-import com.weaponlin.inf.prpc.server.PResponse;
+import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import com.weaponlin.inf.prpc.remote.URI;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;

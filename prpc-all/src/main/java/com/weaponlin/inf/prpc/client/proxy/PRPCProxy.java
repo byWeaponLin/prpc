@@ -2,7 +2,7 @@ package com.weaponlin.inf.prpc.client.proxy;
 
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.config.PConfig;
 import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.requestor.PClientRequestor;

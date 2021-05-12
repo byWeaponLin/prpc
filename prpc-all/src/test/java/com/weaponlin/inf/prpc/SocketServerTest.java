@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc;
 
-import com.weaponlin.inf.prpc.client.PRequest;
+import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.reflections.Reflections;
 

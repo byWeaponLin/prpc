@@ -2,7 +2,6 @@ package com.weaponlin.inf.prpc.registry;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.exception.PRpcException;
-import com.weaponlin.inf.prpc.config.PRPCConfig;
 import com.weaponlin.inf.prpc.utils.NetUtils;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
@@ -63,12 +62,6 @@ public class ZooKeeperRegistry extends AbstractRegistry {
 
     private Map<String, List<Class<?>>> groupService = new ConcurrentHashMap<>();
 
-    /**
-     * TODO temporary
-     */
-    @Deprecated
-    private PRPCConfig.RegistryProperties registryProperties;
-
     private ZooKeeper zooKeeper;
 
     private String basePath;
@@ -85,30 +78,6 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             });
             // TODO self adaption '/' character for zk path
             this.basePath = Stream.of(PRPC_PATH)
-                    .filter(StringUtils::isNotBlank)
-                    .collect(joining());
-            if (zooKeeper.exists(basePath, false) == null) {
-                // 初始化basePath
-                zooKeeper.create(basePath, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }
-        } catch (Exception e) {
-            log.error("init zk failed", e);
-            throw new PRpcException("init zk failed");
-        }
-    }
-
-    /**
-     * TODO provide server-registry and client-registry
-     */
-
-    private void init() {
-        try {
-            this.zooKeeper = new ZooKeeper(registryProperties.getHost(), registryProperties.getTimeout(), watchEvent -> {
-                // TODO watch event
-                log.info("watchEvent: {}", watchEvent);
-            });
-            // TODO self adaption '/' character for zk path
-            this.basePath = Stream.of(registryProperties.getPath(), PRPC_PATH)
                     .filter(StringUtils::isNotBlank)
                     .collect(joining());
             if (zooKeeper.exists(basePath, false) == null) {
