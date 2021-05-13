@@ -20,24 +20,29 @@ public class PDecoder extends ByteToMessageDecoder {
 
     private Class decodeClass;
 
-    /**
-     * protocol type field
-     */
-    private String protocolType;
+    private String codec = "protobuf";
+
+    private String protocol = "prpc";
 
     public PDecoder(@NonNull Class decodeClass) {
         this.decodeClass = decodeClass;
     }
 
-    public PDecoder(Class decodeClass, String protocolType) {
+    public PDecoder(Class decodeClass, String codec) {
         this.decodeClass = decodeClass;
-        this.protocolType = protocolType;
+        this.codec = codec;
+    }
+
+    public PDecoder(Class decodeClass, String codec, String protocol) {
+        this.decodeClass = decodeClass;
+        this.codec = codec;
+        this.protocol = protocol;
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         // TODO 超级慢，急需优化
-        PCodec codec = ServiceLoader.getService(PCodec.class, protocolType);
+        PCodec codec = ServiceLoader.getService(PCodec.class, this.codec);
 
         ByteBuf headByteBuf = in.readBytes(PHeader.HEAD_LEN);
         PHeader header = PHeader.decode(headByteBuf);

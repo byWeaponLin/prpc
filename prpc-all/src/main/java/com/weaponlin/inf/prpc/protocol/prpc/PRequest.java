@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PRequest implements Serializable {
+public class PRequest implements PPacket, Serializable {
     private static final long serialVersionUID = -9031849935007421804L;
 
     private String group;
@@ -32,9 +32,12 @@ public class PRequest implements Serializable {
      */
     private Map<String, Object> attachments;
 
+    @Override
     public PMeta getMeta() {
         return new PMeta().setRequestId(requestId)
                 .setServiceName(serviceName)
                 .setMethodName(methodName);
     }
+
+
 }

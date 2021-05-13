@@ -14,7 +14,7 @@ prpc:
       zookeeper:
         zookeeper://127.0.0.1:2181/prpc/online
 
-# server
+
 prpc1:
   server:
     protocol: prpc
@@ -25,16 +25,14 @@ prpc1:
     package: com.weaponlin.inf.prpc.test # scan package, spring用
     timeout: 30000
     groups:
-      - group:
-          default
+      - group: default
         registry:
           naming: zookeeper
           address: zookeeper://127.0.0.1:2181/prpc/online
         codec: protobuf
         protocol: http
         timeout: 30000
-      - group:
-          test
+      - group: test
         registry:
           naming: zookeeper
           address: zookeeper://127.0.0.1:2181/prpc/online

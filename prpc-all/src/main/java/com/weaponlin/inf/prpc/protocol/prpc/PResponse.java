@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PResponse implements Serializable {
+public class PResponse implements PPacket, Serializable {
     private static final long serialVersionUID = 4271546719542089640L;
 
     private String requestId;
@@ -27,6 +27,7 @@ public class PResponse implements Serializable {
 
     private Map<String, Object> attachments;
 
+    @Override
     public PMeta getMeta() {
         return new PMeta().setRequestId(requestId)
                 .setServiceName(serviceName)

@@ -1,6 +1,5 @@
 package com.weaponlin.inf.prpc.codec;
 
-import com.weaponlin.inf.prpc.constants.Constants;
 import com.weaponlin.inf.prpc.loader.ServiceLoader;
 import com.weaponlin.inf.prpc.protocol.prpc.PHeader;
 import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
@@ -22,20 +21,30 @@ public class PEncoder extends MessageToByteEncoder {
 
     private Class encodeClass;
 
-    private String protocolType;
+    private String codec = "protobuf";
+
+    private String protocol = "prpc";
 
     public PEncoder(@NonNull Class encodeClass) {
         this.encodeClass = encodeClass;
     }
 
-    public PEncoder(Class encodeClass, String protocolType) {
+    public PEncoder(Class encodeClass, String codec) {
         this.encodeClass = encodeClass;
-        this.protocolType = protocolType;
+        this.codec = codec;
     }
+
+    public PEncoder(Class encodeClass, String codec, String protocol) {
+        this.encodeClass = encodeClass;
+        this.codec = codec;
+        this.protocol = protocol;
+    }
+
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-        PCodec codec = ServiceLoader.getService(PCodec.class, protocolType);
+        // TODO
+        PCodec codec = ServiceLoader.getService(PCodec.class, this.codec);
         if (PRequest.class == encodeClass) {
 
             PRequest request = (PRequest) msg;

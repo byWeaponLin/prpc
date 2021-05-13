@@ -49,7 +49,8 @@ an rpc framework
 - [x] prpc协议添加magic num
 - [ ] client请求进行管理，超时直接抛异常
 - [ ] 预置系统变量，例如：idc等
-- [ ] ServiceLoader优化，获取service太慢了
+- [ ] ServiceLoader优化，静态代码块，在使用的时候采取加载初始化，导致获取service太慢了
+- [ ] 限制请求大小
 
 ## 4 Quick Start
 
