@@ -41,6 +41,7 @@ public class PInterface {
      */
     private static Map<String, PInterface> cachedInstances = new ConcurrentHashMap<>();
 
+    // TODO 适配其他协议
     public static Pair<Object, Method> getInstanceAndMethod(String group, String serviceName, String methodName,
                                                             Class<?>[] parameterTypes) {
         try {

@@ -20,7 +20,7 @@ public enum ProtocolType {
     public static final Map<String, ProtocolType> PROTOCOL_MAP = Stream.of(ProtocolType.values())
             .collect(toMap(Enum::name, Function.identity()));
 
-    public static ProtocolType getProtocol(String protocol) {
+    public static ProtocolType getProtocolType(String protocol) {
         return Optional.ofNullable(PROTOCOL_MAP.get(protocol))
                 .orElseThrow(() -> new PRpcException("not support protocol: " + protocol));
     }

@@ -12,27 +12,20 @@ import java.util.Map;
 
 public class PProtocolFactory {
 
-    private static Map<ProtocolGroup, Protocol> PROTOCOL_CACHE = new HashMap<>();
-
-    public static Protocol getProtocol(ProtocolType protocolType, String codec) {
-        ProtocolGroup protocolGroup = new ProtocolGroup().setProtocolType(protocolType)
-                .setCodec(codec);
-
-        if (PROTOCOL_CACHE.containsKey(protocolGroup)) {
-            return PROTOCOL_CACHE.get(protocolGroup);
-        }
+    public static PProtocol getProtocol(ProtocolType protocolType, String codec) {
 
         if (protocolType == ProtocolType.prpc) {
-            PRPCProtocol prpcProtocol = new PRPCProtocol(protocolType, codec);
-            PROTOCOL_CACHE.put(protocolGroup, prpcProtocol);
-            return prpcProtocol;
+            return new PRPCProtocol(protocolType, codec);
         } else if (protocolType == ProtocolType.dubbo) {
-            DubboProtocol dubboProtocol = new DubboProtocol(protocolType, codec);
-            PROTOCOL_CACHE.put(protocolGroup, dubboProtocol);
-            return dubboProtocol;
+            return new DubboProtocol(protocolType, codec);
         } else {
             throw new PRpcException("cant recognize protocol: " + protocolType);
         }
+    }
+
+    public static PProtocol getProtocol(String protocol, String codec) {
+        ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
+        return getProtocol(protocolType, codec);
     }
 
     @Data

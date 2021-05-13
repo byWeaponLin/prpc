@@ -1,6 +1,8 @@
 package com.weaponlin.inf.prpc.codec;
 
 import com.weaponlin.inf.prpc.loader.ServiceLoader;
+import com.weaponlin.inf.prpc.protocol.PProtocolFactory;
+import com.weaponlin.inf.prpc.protocol.PProtocol;
 import com.weaponlin.inf.prpc.protocol.prpc.PHeader;
 import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
@@ -44,35 +46,38 @@ public class PEncoder extends MessageToByteEncoder {
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         // TODO
-        PCodec codec = ServiceLoader.getService(PCodec.class, this.codec);
-        if (PRequest.class == encodeClass) {
+        PProtocol pprotocol = PProtocolFactory.getProtocol(protocol, codec);
+        pprotocol.encode(out, msg);
 
-            PRequest request = (PRequest) msg;
-            PMeta meta = request.getMeta();
-            byte[] metaBytes = codec.encode(meta);
-            byte[] bodyBytes = codec.encode(request);
-
-            PHeader head = new PHeader();
-            head.setMetaSize(metaBytes.length);
-            head.setBodySize(bodyBytes.length);
-            head.encode(out);
-
-            out.writeBytes(metaBytes);
-            out.writeBytes(bodyBytes);
-
-        } else if (PResponse.class == encodeClass) {
-            PResponse response = (PResponse) msg;
-            PMeta meta = response.getMeta();
-            byte[] metaBytes = codec.encode(meta);
-            byte[] bodyBytes = codec.encode(response);
-
-            PHeader head = new PHeader();
-            head.setMetaSize(metaBytes.length);
-            head.setBodySize(bodyBytes.length);
-            head.encode(out);
-
-            out.writeBytes(metaBytes);
-            out.writeBytes(bodyBytes);
-        }
+//        PCodec codec = ServiceLoader.getService(PCodec.class, this.codec);
+//        if (PRequest.class == encodeClass) {
+//
+//            PRequest request = (PRequest) msg;
+//            PMeta meta = request.getMeta();
+//            byte[] metaBytes = codec.encode(meta);
+//            byte[] bodyBytes = codec.encode(request);
+//
+//            PHeader head = new PHeader();
+//            head.setMetaSize(metaBytes.length);
+//            head.setBodySize(bodyBytes.length);
+//            head.encode(out);
+//
+//            out.writeBytes(metaBytes);
+//            out.writeBytes(bodyBytes);
+//
+//        } else if (PResponse.class == encodeClass) {
+//            PResponse response = (PResponse) msg;
+//            PMeta meta = response.getMeta();
+//            byte[] metaBytes = codec.encode(meta);
+//            byte[] bodyBytes = codec.encode(response);
+//
+//            PHeader head = new PHeader();
+//            head.setMetaSize(metaBytes.length);
+//            head.setBodySize(bodyBytes.length);
+//            head.encode(out);
+//
+//            out.writeBytes(metaBytes);
+//            out.writeBytes(bodyBytes);
+//        }
     }
 }

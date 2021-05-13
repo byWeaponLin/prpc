@@ -87,4 +87,15 @@ public class PRPCProtocol extends AbstractProtocol {
             throw new PRpcException("cant deserialize request, class: " + msg.getClass().getName(), e);
         }
     }
+
+    @Override
+    public PPacket getPacket(Class<?> clazz) {
+        if (clazz == PRequest.class) {
+            return request;
+        } else if (clazz == PResponse.class) {
+            return response;
+        } else {
+            throw new PRpcException("invalid packet class: " + clazz);
+        }
+    }
 }

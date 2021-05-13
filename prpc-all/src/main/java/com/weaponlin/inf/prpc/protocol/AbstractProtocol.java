@@ -3,7 +3,7 @@ package com.weaponlin.inf.prpc.protocol;
 import com.weaponlin.inf.prpc.codec.PCodec;
 import com.weaponlin.inf.prpc.loader.ServiceLoader;
 
-public abstract class AbstractProtocol implements Protocol {
+public abstract class AbstractProtocol implements PProtocol {
 
     private ProtocolType protocolType;
 
