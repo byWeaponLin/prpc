@@ -39,7 +39,7 @@ an rpc framework
 
 一些待优化的事情记录
 
-- [ ] 协议优化，分别读写meta、request、response等
+- [x] 协议优化，分别读写meta、request、response等
 - [x] shutdown hook，在服务关闭的时候及时清理zk节点
 - [ ] zookeeper server节点优化，定义prpc协议，例如: prc://127.0.0.1:9999?idc=nj&weight=10
 - [ ] 通信预热
@@ -47,7 +47,9 @@ an rpc framework
 - [ ] config数据结构优化，清晰一些
 - [ ] 支持多端口启动，例如服务同时需要支持dubbo和prpc协议，需要启动两个端口，分别接收请求
 - [x] prpc协议添加magic num
-
+- [ ] client请求进行管理，超时直接抛异常
+- [ ] 预置系统变量，例如：idc等
+- [ ] ServiceLoader优化，获取service太慢了
 
 ## 4 Quick Start
 

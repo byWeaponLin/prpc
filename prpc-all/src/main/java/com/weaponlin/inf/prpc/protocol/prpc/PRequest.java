@@ -31,4 +31,10 @@ public class PRequest implements Serializable {
      * TODO
      */
     private Map<String, Object> attachments;
+
+    public PMeta getMeta() {
+        return new PMeta().setRequestId(requestId)
+                .setServiceName(serviceName)
+                .setMethodName(methodName);
+    }
 }

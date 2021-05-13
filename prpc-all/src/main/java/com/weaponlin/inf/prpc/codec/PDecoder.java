@@ -1,8 +1,9 @@
 package com.weaponlin.inf.prpc.codec;
 
-import com.weaponlin.inf.prpc.constants.Constants;
 import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.loader.ServiceLoader;
+import com.weaponlin.inf.prpc.protocol.prpc.PHeader;
+import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -35,17 +36,29 @@ public class PDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        // TODO 超级慢，急需优化
         PCodec codec = ServiceLoader.getService(PCodec.class, protocolType);
-        int magic = in.readInt();
-        if (magic != Constants.MAGIC) {
-            throw new PRpcException("invalid protocol");
+
+        ByteBuf headByteBuf = in.readBytes(PHeader.HEAD_LEN);
+        PHeader header = PHeader.decode(headByteBuf);
+        header.validate();
+
+        try {
+            byte[] metaBytes = new byte[header.getMetaSize()];
+            in.readBytes(metaBytes);
+            PMeta meta = new PMeta();
+            codec.decode(metaBytes, meta);
+
+            meta.validate();
+
+
+            byte[] bodyBytes = new byte[header.getBodySize()];
+            in.readBytes(bodyBytes);
+            final Object t = decodeClass.newInstance();
+            codec.decode(bodyBytes, t);
+            out.add(t);
+        } catch (Throwable e) {
+            throw new PRpcException("cant deserialize request, class: " + decodeClass.getName(), e);
         }
-        final int bytesLen = in.readableBytes();
-        byte[] bytes = new byte[bytesLen];
-        in.readBytes(bytes);
-        // TODO 太消耗性能，待优化
-        final Object t = decodeClass.newInstance();
-        codec.decode(bytes, t);
-        out.add(t);
     }
 }

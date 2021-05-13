@@ -17,9 +17,19 @@ public class PResponse implements Serializable {
 
     private String requestId;
 
+    private String serviceName;
+
+    private String methodName;
+
     private Object exception;
 
     private Object result;
 
     private Map<String, Object> attachments;
+
+    public PMeta getMeta() {
+        return new PMeta().setRequestId(requestId)
+                .setServiceName(serviceName)
+                .setMethodName(methodName);
+    }
 }
