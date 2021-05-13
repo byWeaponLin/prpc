@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
 import com.weaponlin.inf.prpc.constants.Constants;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -33,7 +33,7 @@ public class PHeader {
 
     public void validate() {
         if (magic != Constants.MAGIC || metaSize <= 0 || bodySize <= 0) {
-            throw new PRpcException("invalid protocol");
+            throw new PRPCException("invalid protocol");
         }
     }
 }

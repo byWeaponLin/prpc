@@ -1,10 +1,10 @@
 package com.weaponlin.inf.prpc.cluster;
 
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.client.proxy.ClientHandler;
 import com.weaponlin.inf.prpc.codec.PDecoder;
 import com.weaponlin.inf.prpc.codec.PEncoder;
-import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.loadbalance.LoadBalance;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import com.weaponlin.inf.prpc.remote.URI;
@@ -40,7 +40,7 @@ abstract class PAbstractCluster implements PCluster {
         // load balance
         final URI uri = loadBalance.select(request.getServiceName() + ":" + request.getGroup());
         if (uri == null) {
-            throw new PRpcException("can't select a server from load balancer");
+            throw new PRPCException("can't select a server from load balancer");
         }
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         ClientHandler clientHandler = new ClientHandler();
@@ -79,11 +79,11 @@ abstract class PAbstractCluster implements PCluster {
         // TODO VERY IMPORTANT!!! cost many time for getting response
         final PResponse response = (PResponse) clientHandler.getRes();
         if (response == null) {
-            throw new PRpcException("response is null");
+            throw new PRPCException("response is null");
         } else if (response.getException() == null) {
             return response.getResult();
         } else {
-            throw new PRpcException(getMessage(request, response), (Throwable) response.getException());
+            throw new PRPCException(getMessage(request, response), (Throwable) response.getException());
         }
     }
 

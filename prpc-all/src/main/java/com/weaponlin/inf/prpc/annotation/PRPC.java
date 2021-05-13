@@ -16,5 +16,5 @@ public @interface PRPC {
      *
      * @return
      */
-    String group();
+    String group() default "default";
 }

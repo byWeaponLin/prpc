@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.utils;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +21,7 @@ public class NetUtils {
             return addr.getHostAddress();
         } catch (UnknownHostException e) {
             log.error("get local host failed", e);
-            throw new PRpcException("get local host failed");
+            throw new PRPCException("get local host failed");
         }
     }
 }

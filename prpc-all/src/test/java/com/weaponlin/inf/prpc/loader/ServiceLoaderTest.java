@@ -1,22 +1,22 @@
 package com.weaponlin.inf.prpc.loader;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ServiceLoaderTest {
 
-    @Test(expected = PRpcException.class)
+    @Test(expected = PRPCException.class)
     public void throw_exception_if_class_is_not_an_interface() {
         ServiceLoader.getService(D.class, "");
     }
 
-    @Test(expected = PRpcException.class)
+    @Test(expected = PRPCException.class)
     public void throw_exception_if_extension_is_blank() {
         ServiceLoader.getService(A.class, "");
     }
 
-    @Test(expected = PRpcException.class)
+    @Test(expected = PRPCException.class)
     public void throw_exception_if_extension_is_invalid() {
         ServiceLoader.getService(A.class, "D");
     }

@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.protocol;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +22,10 @@ public enum ProtocolType {
 
     public static ProtocolType getProtocolType(String protocol) {
         return Optional.ofNullable(PROTOCOL_MAP.get(protocol))
-                .orElseThrow(() -> new PRpcException("not support protocol: " + protocol));
+                .orElseThrow(() -> new PRPCException("not support protocol: " + protocol));
+    }
+
+    public static boolean contain(String protocol) {
+        return PROTOCOL_MAP.containsKey(protocol);
     }
 }

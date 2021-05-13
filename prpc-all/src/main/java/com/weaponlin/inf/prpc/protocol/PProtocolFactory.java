@@ -1,14 +1,11 @@
 package com.weaponlin.inf.prpc.protocol;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.dubbo.DubboProtocol;
 import com.weaponlin.inf.prpc.protocol.prpc.PRPCProtocol;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class PProtocolFactory {
 
@@ -19,7 +16,7 @@ public class PProtocolFactory {
         } else if (protocolType == ProtocolType.dubbo) {
             return new DubboProtocol(protocolType, codec);
         } else {
-            throw new PRpcException("cant recognize protocol: " + protocolType);
+            throw new PRPCException("cant recognize protocol: " + protocolType);
         }
     }
 

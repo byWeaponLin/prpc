@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.loader;
 
 import com.weaponlin.inf.prpc.codec.PCodec;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.loadbalance.LoadBalance;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
@@ -55,10 +55,10 @@ public class ServiceLoader {
 
     public synchronized static <T> T getService(@NonNull Class<T> clazz, String extensionName) {
         if (!clazz.isInterface()) {
-            throw new PRpcException("load class must be an interface: " + clazz.getName());
+            throw new PRPCException("load class must be an interface: " + clazz.getName());
         }
         if (StringUtils.isBlank(extensionName)) {
-            throw new PRpcException("cant load service for extension is blank");
+            throw new PRPCException("cant load service for extension is blank");
         }
 
         if (loaders.containsKey(clazz)) {
@@ -109,7 +109,7 @@ public class ServiceLoader {
                             log.error("new instance failed, class: {}", clazz.getName(), e);
                             return null;
                         }
-                    }).orElseThrow(() -> new PRpcException("load service failed, not found necessary candidate for " + name));
+                    }).orElseThrow(() -> new PRPCException("load service failed, not found necessary candidate for " + name));
         }
 
     }

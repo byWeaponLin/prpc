@@ -2,6 +2,7 @@ package com.weaponlin.inf.prpc.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -80,6 +81,7 @@ public class PRPConfig {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @EqualsAndHashCode
     public static class PRegistry {
         /**
          * optional: none, zookeeper, redis, etcd
@@ -102,33 +104,40 @@ public class PRPConfig {
         /**
          * unit: milliseconds
          */
-        private int connectionTimeout = 30000;
+        private int connectionTimeouts;
 
         /**
          * @client fault tolerant of cluster
          * optional: failfast, failover
          */
-        private String cluster = "failfast";
+        private String cluster;
 
         /**
          * @client load balance
          * optional: random, roundrobin
          */
-        private String loadBalance = "random";
+        private String loadBalance;
 
         /**
          * data encode&decode
          * optional: protobuf, json and so on
          */
-        private String codec = "protobuf";
+        private String codec;
 
         /**
          * application protocol
          * optional: prpc, dubbo, http and so on
          */
-        private String protocol = "prpc";
+        private String protocol;
 
-        private String group = "default";
+        private String group;
+
+        /**
+         * TODO
+         */
+        private String basePackage = "";
+
+        private List<Class<?>> services;
     }
 
 }

@@ -6,7 +6,7 @@ import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.codec.PDecoder;
 import com.weaponlin.inf.prpc.codec.PEncoder;
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import com.weaponlin.inf.prpc.registry.Registry;
 import com.weaponlin.inf.prpc.registry.RegistryFactory;
@@ -74,7 +74,6 @@ public class NettyServer {
      * @param port
      * @param config
      */
-    @Deprecated
     public NettyServer(int port, PConfig config) {
         this.port = port;
         configValidate(config);
@@ -93,11 +92,11 @@ public class NettyServer {
     public NettyServer addService(Class<?> service) {
         final PRPC prpc = service.getAnnotation(PRPC.class);
         if (prpc == null || StringUtils.isBlank(prpc.group())) {
-            throw new PRpcException("class must annotate with @PRPC or group cant be blank");
+            throw new PRPCException("class must annotate with @PRPC or group cant be blank");
         }
         final String group = prpc.group();
         if (!groupRegistry.containsKey(group) && StringUtils.isBlank(config.getAddress())) {
-            throw new PRpcException("cant find zookeeper for group " + group);
+            throw new PRPCException("cant find zookeeper for group " + group);
         }
         groupRegistry.putIfAbsent(group, new PClient.GroupRegistry(config.getAddress()));
         final PClient.GroupRegistry groupRegistry = this.groupRegistry.get(group);
@@ -170,7 +169,7 @@ public class NettyServer {
             future.channel().closeFuture().sync();
         } catch (Exception e) {
             log.error("server start failed", e);
-            throw new PRpcException("server start failed", e);
+            throw new PRPCException("server start failed", e);
         } finally {
             // 最后记得主从group要优雅停机。
             bossGroup.shutdownGracefully();
@@ -180,20 +179,20 @@ public class NettyServer {
 
     private void configValidate(PConfig config) {
         if (config == null) {
-            throw new PRpcException("config cant be null");
+            throw new PRPCException("config cant be null");
         }
         // TODO config validate by registry
         if (StringUtils.isBlank(config.getAddress())) {
 
             if (CollectionUtils.isEmpty(config.getGroups())) {
-                throw new PRpcException("no valid zookeeper configuration");
+                throw new PRPCException("no valid zookeeper configuration");
             }
 
             config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
                 Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                        .orElseThrow(() -> new PRPCException("group is invalid for it is blank"));
                 Optional.ofNullable(group.getAddress()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRpcException("invalid zookeeper configuration"));
+                        .orElseThrow(() -> new PRPCException("invalid zookeeper configuration"));
                 groupRegistry.putIfAbsent(group.getGroup(), new PClient.GroupRegistry(group.getAddress()));
             });
         } else {
@@ -202,7 +201,7 @@ public class NettyServer {
             }
             config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
                 Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRpcException("group is invalid for it is blank"));
+                        .orElseThrow(() -> new PRPCException("group is invalid for it is blank"));
                 if (StringUtils.isNotBlank(group.getAddress())) {
                     groupRegistry.putIfAbsent(group.getGroup(), new PClient.GroupRegistry(group.getAddress()));
                 } else {

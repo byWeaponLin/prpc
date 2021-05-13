@@ -4,7 +4,7 @@ import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.api.HelloRequest;
 import com.weaponlin.inf.prpc.client.PClient;
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.registry.ZooKeeperRegistry;
+import com.weaponlin.inf.prpc.registry.PRPCZooKeeperRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,7 @@ public class ClientTest {
 
     public static void main(String[] args) {
         PConfig config = new PConfig();
-        config.setRegistry(ZooKeeperRegistry.REGISTRY);
+        config.setRegistry(PRPCZooKeeperRegistry.REGISTRY);
         config.setAddress("127.0.0.1:2181");
         HelloApi helloApi = new PClient(config).getService(HelloApi.class);
 

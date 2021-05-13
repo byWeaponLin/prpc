@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.AbstractProtocol;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import io.netty.buffer.ByteBuf;
@@ -55,7 +55,7 @@ public class PRPCProtocol extends AbstractProtocol {
             byteBuf.writeBytes(metaBytes);
             byteBuf.writeBytes(bodyBytes);
         } else {
-            throw new PRpcException("invalid protocol");
+            throw new PRPCException("invalid protocol");
         }
     }
 
@@ -84,7 +84,7 @@ public class PRPCProtocol extends AbstractProtocol {
                 this.response = (PResponse) msg;
             }
         } catch (Throwable e) {
-            throw new PRpcException("cant deserialize request, class: " + msg.getClass().getName(), e);
+            throw new PRPCException("cant deserialize request, class: " + msg.getClass().getName(), e);
         }
     }
 
@@ -95,7 +95,7 @@ public class PRPCProtocol extends AbstractProtocol {
         } else if (clazz == PResponse.class) {
             return response;
         } else {
-            throw new PRpcException("invalid packet class: " + clazz);
+            throw new PRPCException("invalid packet class: " + clazz);
         }
     }
 }

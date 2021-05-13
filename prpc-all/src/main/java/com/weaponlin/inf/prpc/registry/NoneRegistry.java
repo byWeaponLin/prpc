@@ -2,7 +2,7 @@ package com.weaponlin.inf.prpc.registry;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,12 @@ public class NoneRegistry extends AbstractRegistry {
 
     @Override
     public void register() {
-        throw new PRpcException("not support operation");
+        throw new PRPCException("not support operation");
     }
 
     @Override
     public void register(Class<?> service) {
-//        throw new PRpcException("not support operation");
+//        throw new PRPCException("not support operation");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class NoneRegistry extends AbstractRegistry {
 
     @Override
     public void subscribe() {
-        throw new PRpcException("not support operation");
+        throw new PRPCException("not support operation");
     }
 
     @Override
@@ -68,12 +68,12 @@ public class NoneRegistry extends AbstractRegistry {
 
     @Override
     public void unsubscribe() {
-        throw new PRpcException("not support operation");
+        throw new PRPCException("not support operation");
     }
 
     @Override
     public void nodeChanged() {
-        throw new PRpcException("not support operation");
+        throw new PRPCException("not support operation");
     }
 
     @Override
@@ -97,7 +97,7 @@ public class NoneRegistry extends AbstractRegistry {
             }
         } catch (Exception e) {
             log.error("zk watch failed", e);
-            throw new PRpcException("zk watch failed", e);
+            throw new PRPCException("zk watch failed", e);
         }
     }
 

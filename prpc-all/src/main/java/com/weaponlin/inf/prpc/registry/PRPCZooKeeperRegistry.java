@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.registry;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.utils.NetUtils;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
@@ -19,6 +19,7 @@ import org.apache.zookeeper.data.ACL;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -43,7 +44,7 @@ import static java.util.stream.Collectors.toSet;
  * | ......
  */
 @Slf4j
-public class ZooKeeperRegistry extends AbstractRegistry {
+public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     public static final String REGISTRY = "zookeeper";
 
@@ -66,7 +67,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
 
     private String basePath;
 
-    public ZooKeeperRegistry(int port, String address, int connectionTimeout) {
+    public PRPCZooKeeperRegistry(int port, String address, int connectionTimeout) {
         this.port = port;
         this.init(address, connectionTimeout);
     }
@@ -86,7 +87,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             }
         } catch (Exception e) {
             log.error("init zk failed", e);
-            throw new PRpcException("init zk failed");
+            throw new PRPCException("init zk failed");
         }
     }
 
@@ -102,7 +103,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void register(Class<?> service) {
         PRPC prpc = service.getAnnotation(PRPC.class);
-        String group = prpc.group();
+        String group = Optional.ofNullable(prpc).map(e -> e.group()).orElse("default");
         if (!groupService.containsKey(group)) {
             groupService.put(group, Lists.newArrayList(service));
         } else {
@@ -175,7 +176,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             }
         } catch (Exception e) {
             log.error("zk watch failed", e);
-            throw new PRpcException("zk watch failed", e);
+            throw new PRPCException("zk watch failed", e);
         }
     }
 
@@ -257,7 +258,7 @@ public class ZooKeeperRegistry extends AbstractRegistry {
             }
         } catch (Exception e) {
             log.error("zk watch failed", e);
-            throw new PRpcException("zk watch failed", e);
+            throw new PRPCException("zk watch failed", e);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.utils;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 
 import java.net.InetAddress;
 import java.net.Socket;
@@ -24,7 +24,7 @@ public class PortUtils {
                 return port;
             }
         }
-        throw new PRpcException("can't find an available port after 1000 times retry");
+        throw new PRPCException("can't find an available port after 1000 times retry");
     }
 
     public static boolean isAvailable(String host, int port) {

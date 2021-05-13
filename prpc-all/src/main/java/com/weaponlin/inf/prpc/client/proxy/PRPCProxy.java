@@ -2,9 +2,9 @@ package com.weaponlin.inf.prpc.client.proxy;
 
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.exception.PRpcException;
 import com.weaponlin.inf.prpc.requestor.PClientRequestor;
 import com.weaponlin.inf.prpc.requestor.PRequestor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class PRPCProxy implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String group = Optional.of(clazz.getAnnotation(PRPC.class)).map(PRPC::group).filter(StringUtils::isNotBlank)
-                .orElseThrow(() -> new PRpcException("api class must annotate with @PRPC"));
+                .orElseThrow(() -> new PRPCException("api class must annotate with @PRPC"));
         final PRequest request = PRequest.builder()
                 .requestId(UUID.randomUUID().toString())
                 .serviceName(clazz.getName())

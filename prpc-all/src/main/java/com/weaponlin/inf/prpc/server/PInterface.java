@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.server;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,7 +51,7 @@ public class PInterface {
                 final Class<?> apiClass = Class.forName(serviceName);
                 Optional.ofNullable(apiClass.getAnnotation(PRPC.class)).map(PRPC::group)
                         .filter(g -> StringUtils.equals(g, group))
-                        .orElseThrow(() -> new PRpcException("no such group service"));
+                        .orElseThrow(() -> new PRPCException("no such group service"));
                 final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
                 final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
                 Object serviceInstance = implementationClass.getConstructor().newInstance();
@@ -65,7 +65,7 @@ public class PInterface {
             }
             return pInterface.getInstanceAndMethod(methodName, parameterTypes);
         } catch (Exception e) {
-            throw new PRpcException("cant extract service instance and method instance", e);
+            throw new PRPCException("cant extract service instance and method instance", e);
         }
     }
 
@@ -80,7 +80,7 @@ public class PInterface {
             methods.putIfAbsent(pmethod, declaredMethod);
             return Pair.of(serviceInstance, methods.get(pmethod));
         } catch (NoSuchMethodException e) {
-            throw new PRpcException(
+            throw new PRPCException(
                     String.format("not found declared method for service: %s, method: %s",
                             serviceName, methodName),
                     e);
@@ -118,7 +118,7 @@ public class PInterface {
             // initialize methods
             pInterface.registerMethods();
         } catch (Exception e) {
-            throw new PRpcException("register server interface failed");
+            throw new PRPCException("register server interface failed");
         }
     }
 

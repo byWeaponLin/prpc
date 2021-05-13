@@ -3,7 +3,6 @@ package com.weaponlin.inf.prpc.protocol.dubbo;
 import com.weaponlin.inf.prpc.protocol.AbstractProtocol;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import com.weaponlin.inf.prpc.protocol.prpc.PPacket;
-import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import io.netty.buffer.ByteBuf;
 
 /**

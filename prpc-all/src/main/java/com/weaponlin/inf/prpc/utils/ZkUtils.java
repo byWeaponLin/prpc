@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.utils;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ public class ZkUtils {
 
     public static String analysisZkPath(String path) {
         if (StringUtils.isBlank(path)) {
-            throw new PRpcException("invalid zk path: " + path);
+            throw new PRPCException("invalid zk path: " + path);
         }
         return Stream.of(path.split(SEPARATOR))
                 .filter(StringUtils::isNotBlank)

@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.loadbalance;
 
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.registry.AbstractRegistry;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
@@ -19,7 +19,7 @@ public interface LoadBalance {
     default List<URI> getProviders(String service) {
         Set<URI> providers = AbstractRegistry.getProviders(service);
         if (CollectionUtils.isEmpty(providers)) {
-            throw new PRpcException("there is no providers, please start server!");
+            throw new PRPCException("there is no providers, please start server!");
         }
         return Lists.newArrayList(providers);
     }

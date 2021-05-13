@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.registry;
 
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.exception.PRpcException;
+import com.weaponlin.inf.prpc.exception.PRPCException;
 
 public class RegistryFactory {
 
@@ -9,11 +9,23 @@ public class RegistryFactory {
         // TODO validate config here
         if (NoneRegistry.REGISTRY.equals(config.getRegistry())) {
             return new NoneRegistry(config);
-        } else if (ZooKeeperRegistry.REGISTRY.equals(config.getRegistry())) {
-            return new ZooKeeperRegistry(port, config.getAddress(), config.getConnectionTimeout());
+        } else if (PRPCZooKeeperRegistry.REGISTRY.equals(config.getRegistry())) {
+            return new PRPCZooKeeperRegistry(port, config.getAddress(), config.getConnectionTimeout());
         }
 
-        throw new PRpcException(String.format("invalid registry: %s, optional values is: %s, %s",
-                config.getRegistry(), NoneRegistry.REGISTRY, ZooKeeperRegistry.REGISTRY));
+        throw new PRPCException(String.format("invalid registry: %s, optional values is: %s, %s",
+                config.getRegistry(), NoneRegistry.REGISTRY, PRPCZooKeeperRegistry.REGISTRY));
+    }
+
+    public static Registry createRegistry(String naming, String address, int port) {
+        if (NoneRegistry.REGISTRY.equals(naming)) {
+            // TODO
+            return new NoneRegistry(null);
+        } else if (PRPCZooKeeperRegistry.REGISTRY.equals(naming)) {
+            return new PRPCZooKeeperRegistry(port, address, 30000);
+        }
+
+        throw new PRPCException(String.format("invalid registry: %s, optional values is: %s, %s",
+                naming, NoneRegistry.REGISTRY, PRPCZooKeeperRegistry.REGISTRY));
     }
 }
