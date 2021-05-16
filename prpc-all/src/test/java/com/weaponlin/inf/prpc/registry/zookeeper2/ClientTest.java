@@ -1,9 +1,10 @@
-package com.weaponlin.inf.prpc.registry.zookeeper;
+package com.weaponlin.inf.prpc.registry.zookeeper2;
 
 import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.api.HelloRequest;
 import com.weaponlin.inf.prpc.client.PClient;
 import com.weaponlin.inf.prpc.config.PConfig;
+import com.weaponlin.inf.prpc.registry.zookeeper.PRPCZooKeeperRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;

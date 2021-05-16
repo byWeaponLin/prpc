@@ -1,4 +1,6 @@
-package com.weaponlin.inf.prpc.registry;
+package com.weaponlin.inf.prpc.registry.zookeeper;
+
+import com.weaponlin.inf.prpc.registry.AbstractRegistry;
 
 /**
  * TODO

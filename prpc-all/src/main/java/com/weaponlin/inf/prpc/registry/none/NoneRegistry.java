@@ -1,8 +1,9 @@
-package com.weaponlin.inf.prpc.registry;
+package com.weaponlin.inf.prpc.registry.none;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.config.PConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.registry.AbstractRegistry;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;

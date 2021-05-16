@@ -1,7 +1,8 @@
-package com.weaponlin.inf.prpc.registry;
+package com.weaponlin.inf.prpc.registry.zookeeper;
 
 import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.registry.AbstractRegistry;
 import com.weaponlin.inf.prpc.utils.NetUtils;
 import com.weaponlin.inf.prpc.remote.URI;
 import com.google.common.collect.Lists;
@@ -44,6 +45,7 @@ import static java.util.stream.Collectors.toSet;
  * | ......
  */
 @Slf4j
+@Deprecated
 public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     public static final String REGISTRY = "zookeeper";

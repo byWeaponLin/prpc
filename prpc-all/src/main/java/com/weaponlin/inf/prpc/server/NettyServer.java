@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
+@Deprecated
 public class NettyServer {
 
     private int port;

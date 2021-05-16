@@ -2,7 +2,6 @@ package com.weaponlin.inf.prpc.registry.none;
 
 import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.config.PConfig;
-import com.weaponlin.inf.prpc.registry.NoneRegistry;
 import com.weaponlin.inf.prpc.server.NettyServer;
 import com.weaponlin.inf.prpc.utils.PortUtils;
 

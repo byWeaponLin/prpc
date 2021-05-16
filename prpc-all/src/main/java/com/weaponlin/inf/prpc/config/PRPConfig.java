@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class PRPConfig {
     /**
      * optional: none, zookeeper and othe will support in the future
      */
-    private PRegistry registry;
+    private PRegistryCenter registryCenter;
 
     /**
      * unit: milliseconds
@@ -82,12 +83,13 @@ public class PRPConfig {
     @NoArgsConstructor
     @AllArgsConstructor
     @EqualsAndHashCode
-    public static class PRegistry {
+    public static class PRegistryCenter {
         /**
          * optional: none, zookeeper, redis, etcd
          */
         private String naming = "zookeeper";
 
+        @NonNull
         private String address;
     }
 
@@ -99,7 +101,7 @@ public class PRPConfig {
         /**
          * optional: none, zookeeper and othe will support in the future
          */
-        private PRegistry registry;
+        private PRegistryCenter registryCenter;
 
         /**
          * unit: milliseconds
@@ -137,6 +139,10 @@ public class PRPConfig {
          */
         private String basePackage = "";
 
+        /**
+         * just for test
+         */
+        @Deprecated
         private List<Class<?>> services;
     }
 

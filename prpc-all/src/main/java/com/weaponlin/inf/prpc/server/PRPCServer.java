@@ -2,14 +2,11 @@ package com.weaponlin.inf.prpc.server;
 
 import com.weaponlin.inf.prpc.codec.CodecPair;
 import com.weaponlin.inf.prpc.codec.CodecType;
-import com.weaponlin.inf.prpc.codec.PDecoder;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
-import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.registry.Registry;
 import com.weaponlin.inf.prpc.registry.RegistryFactory;
-import com.weaponlin.inf.prpc.registry.RegistryNaming;
 import com.weaponlin.inf.prpc.utils.PortUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -27,13 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.weaponlin.inf.prpc.config.PRPConfig.PGroup;
-import static com.weaponlin.inf.prpc.config.PRPConfig.PRegistry;
+import static com.weaponlin.inf.prpc.config.PRPConfig.PRegistryCenter;
 import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
@@ -43,7 +40,14 @@ public class PRPCServer {
 
     private NettyServerHandler nettyServerHandler;
 
-    Map<String, Map<PRegistry, List<PGroup>>> protocolRegistryMap;
+    /**
+     * k: protocol, v: registry
+     * -> k: registry
+     * -> v: services
+     */
+    private Map<String, Map<PRegistryCenter, List<PGroup>>> protocolRegistryMap;
+
+    private List<Registry> registries = new ArrayList<>();
 
     public PRPCServer(@NonNull PRPConfig config) {
         this.config = config;
@@ -54,8 +58,8 @@ public class PRPCServer {
 
     private void complementConfig() {
         config.getGroups().forEach(group -> {
-            if (group.getRegistry() == null) {
-                Optional.ofNullable(config.getRegistry()).ifPresent(group::setRegistry);
+            if (group.getRegistryCenter() == null) {
+                Optional.ofNullable(config.getRegistryCenter()).ifPresent(group::setRegistryCenter);
             }
             if (group.getConnectionTimeouts() <= 0) {
                 Optional.ofNullable(config.getConnectionTimeout()).filter(e -> e <= 0)
@@ -78,48 +82,37 @@ public class PRPCServer {
                         .ifPresent(group::setGroup);
             }
 
-            if (CollectionUtils.isEmpty(group.getServices())) {
-                throw new PRPCException("no identify service discovered");
+            if (StringUtils.isBlank(group.getBasePackage())) {
+                throw new PRPCException("service base package is blank, please check it");
             }
         });
-    }
 
-
-    public void registerService() {
+        // 聚合数据
         this.protocolRegistryMap = config.getGroups().stream()
-                .collect(groupingBy(PGroup::getProtocol, groupingBy(PGroup::getRegistry)));
-
-        // TODO
-
+                .collect(groupingBy(PGroup::getProtocol,
+                        groupingBy(PGroup::getRegistryCenter)));
     }
-
 
     public void start() {
         // TODO
-        registerService();
-        protocolRegistryMap.entrySet().forEach(entry -> {
-            Map<PRegistry, List<PGroup>> registryMap = entry.getValue();
-            ProtocolType protocolType = ProtocolType.getProtocolType(entry.getKey());
-            // 暂时写死
-            CodecPair codecPair = CodecPair.getServerCodec(protocolType, "protobuf");
-            int port = PortUtils.getAvailablePort();
+        protocolRegistryMap.forEach((protocol, registryCenters) -> {
+            ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
 
-            // 先启动服务，再注册service到注册中心
-            startService(codecPair, port);
+            int serverPort = PortUtils.getAvailablePort();
 
             // 注册
-            registryMap.forEach((registry, groups) -> {
-                Registry registry1 = RegistryFactory.createRegistry(registry.getNaming(), registry.getAddress(), port);
-
-                groups.stream().map(PGroup::getServices).filter(CollectionUtils::isNotEmpty)
-                        .flatMap(Collection::stream).forEach(service -> {
-                            registry1.register(service);
-                });
+            registryCenters.forEach((registryCenter, groups) -> {
+                Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
+                registry.register();
             });
+
+            // 先启动服务，再注册service到注册中心，暂时写死codec
+            startServer(protocolType, "protobuf", serverPort);
+
         });
     }
 
-    private void startService(CodecPair codecPair, int port) {
+    private void startServer(ProtocolType protocolType, String codec, int serverPort) {
         // 创建主从EventLoopGroup
         // TODO 一个协议一个端口
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -134,6 +127,7 @@ public class PRPCServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+                            CodecPair codecPair = CodecPair.getServerCodec(protocolType, codec);
                             ChannelPipeline pipeline = ch.pipeline();
 //                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
@@ -150,7 +144,7 @@ public class PRPCServer {
                         }
                     });
             // 这里同步等待future的返回，若返回失败，那么抛出异常
-            ChannelFuture future = serverBootstrap.bind(port).sync();
+            ChannelFuture future = serverBootstrap.bind(serverPort).sync();
             // 关闭future
             future.channel().closeFuture().sync();
         } catch (Exception e) {
@@ -163,19 +157,11 @@ public class PRPCServer {
         }
     }
 
-    public void validateConfig() {
+    private void validateConfig() {
         // TODO
         List<PGroup> groups = config.getGroups();
         if (CollectionUtils.isEmpty(groups)) {
             throw new PRPCException("no identify service discovered");
         }
-
-        groups.forEach(group -> {
-            PRegistry registry = group.getRegistry();
-            if (registry != null && (!RegistryNaming.contain(registry.getNaming())
-                    || StringUtils.isNotBlank(registry.getAddress())) ) {
-                throw new PRPCException("invalid registry: " + registry + "group: ");
-            }
-        });
     }
 }
