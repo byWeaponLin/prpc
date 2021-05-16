@@ -18,7 +18,7 @@ public abstract class AbstractProtocol implements PProtocol {
         return codec.encode(msg);
     }
 
-    protected void decode(byte[] bytes, Object msg) {
-        codec.decode(bytes, msg);
+    protected Object decode(byte[] bytes, Object msg) {
+        return codec.decode(bytes, msg);
     }
 }

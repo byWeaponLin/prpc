@@ -33,7 +33,7 @@ abstract class PAbstractCluster implements PCluster {
     PAbstractCluster(LoadBalance loadBalance) {
         this.loadBalance = loadBalance;
         // TODO get protocolType from configuration
-        this.pEncoder = new PEncoder(PRequest.class, "protobuf");
+        this.pEncoder = new PEncoder(PRequest.class, "fastjson");
     }
 
     Object doRequest(PRequest request) {

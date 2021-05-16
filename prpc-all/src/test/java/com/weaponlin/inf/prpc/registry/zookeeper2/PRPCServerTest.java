@@ -13,7 +13,7 @@ public class PRPCServerTest {
         registryCenter.setAddress("127.0.0.1:2181");
         prpConfig.setRegistryCenter(registryCenter);
         PRPConfig.PGroup group = new PRPConfig.PGroup();
-        group.setCodec("protobuf");
+        group.setCodec("fastjson");
         group.setProtocol("prpc");
         group.setBasePackage("com.weaponlin.inf.prpc.api");
         prpConfig.setGroups(Lists.newArrayList(group));

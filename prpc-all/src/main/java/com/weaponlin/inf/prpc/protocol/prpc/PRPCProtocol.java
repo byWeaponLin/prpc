@@ -71,16 +71,17 @@ public class PRPCProtocol extends AbstractProtocol {
             byte[] metaBytes = new byte[this.header.getMetaSize()];
             byteBuf.readBytes(metaBytes);
             this.meta = new PMeta();
-            decode(metaBytes, this.meta);
+            meta = (PMeta) decode(metaBytes, this.meta);
             this.meta.validate();
 
+            // TODO json 反序列化失败了
             // body
             byte[] bodyBytes = new byte[this.header.getBodySize()];
             byteBuf.readBytes(bodyBytes);
-            decode(bodyBytes, msg);
-            if (msg instanceof PRequest) {
+            Object body = decode(bodyBytes, msg);
+            if (body instanceof PRequest) {
                 this.request = (PRequest) msg;
-            } else if (msg instanceof PResponse) {
+            } else if (body instanceof PResponse) {
                 this.response = (PResponse) msg;
             }
         } catch (Throwable e) {

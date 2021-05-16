@@ -31,7 +31,7 @@ public class PRPCProxy implements InvocationHandler {
         final String group = Optional.of(clazz.getAnnotation(PRPC.class)).map(PRPC::group).filter(StringUtils::isNotBlank)
                 .orElseThrow(() -> new PRPCException("api class must annotate with @PRPC"));
         final PRequest request = PRequest.builder()
-                .requestId(UUID.randomUUID().toString())
+                .requestId("1111")
                 .serviceName(clazz.getName())
                 .methodName(method.getName())
                 .group(group)
