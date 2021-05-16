@@ -33,6 +33,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             Object serviceInstance = instanceAndMethod.getKey();
             Object result = methodInstance.invoke(serviceInstance, request.getParams());
             response.setResult(result);
+            response.setResultType(result.getClass());
         } catch (Exception e) {
             log.error("invoke service implement failed", e);
             response.setException(e);

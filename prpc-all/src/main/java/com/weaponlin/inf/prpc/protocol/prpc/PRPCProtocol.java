@@ -78,13 +78,14 @@ public class PRPCProtocol extends AbstractProtocol {
             // body
             byte[] bodyBytes = new byte[this.header.getBodySize()];
             byteBuf.readBytes(bodyBytes);
-            Object body = decode(bodyBytes, msg);
-            if (body instanceof PRequest) {
+            msg = decode(bodyBytes, msg);
+            if (msg instanceof PRequest) {
                 this.request = (PRequest) msg;
-            } else if (body instanceof PResponse) {
+            } else if (msg instanceof PResponse) {
                 this.response = (PResponse) msg;
             }
         } catch (Throwable e) {
+            // TODO return e to client
             throw new PRPCException("cant deserialize request, class: " + msg.getClass().getName(), e);
         }
     }

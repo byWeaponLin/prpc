@@ -22,7 +22,8 @@ an rpc framework
     - [ ] fastover
 - [ ] 序列化协议
     - [x] protobuf
-    - [x] json
+    - [x] jackson
+    - [ ] fastjson
 - [ ] 应用协议兼容
     - [ ] dubbo
     - [ ] http

@@ -1,5 +1,6 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,9 +26,12 @@ public class PResponse implements PPacket, Serializable {
 
     private Object result;
 
+    private Class<?> resultType;
+
     private Map<String, Object> attachments;
 
     @Override
+    @JsonIgnore
     public PMeta getMeta() {
         return new PMeta().setRequestId(requestId)
                 .setServiceName(serviceName)
