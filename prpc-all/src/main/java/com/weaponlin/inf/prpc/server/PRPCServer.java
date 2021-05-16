@@ -107,7 +107,7 @@ public class PRPCServer {
             });
 
             // 先启动服务，再注册service到注册中心，暂时写死codec
-            startServer(protocolType, "jackson", serverPort);
+            startServer(protocolType, "fastjson", serverPort);
 
         });
     }

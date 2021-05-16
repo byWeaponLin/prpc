@@ -1,20 +1,16 @@
 package com.weaponlin.inf.prpc.codec;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.loader.Extension;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
-import lombok.Data;
-
-import java.io.IOException;
 
 /**
  * encode/decode with jackson
  */
 @Extension(name = "jackson")
-public class JsonCodec implements PCodec {
+public class JacksonCodec implements PCodec {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
