@@ -66,6 +66,7 @@ public class RegistryFactory {
                 return new PRPC2ZooKeeperRegistry(registryCenter, groups, serverPort, 30000);
             } else if (protocolType == ProtocolType.dubbo) {
                 // TODO
+                return new DubboZooKeeperRegistry(registryCenter, groups, serverPort, 30000);
             }
         }
 

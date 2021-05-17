@@ -9,7 +9,7 @@ import lombok.Data;
 public class PHeader {
     public static final int HEAD_LEN = 12;
 
-    private int magic = Constants.MAGIC;
+    private int magic = Constants.PRPC_MAGIC;
 
     /**
      * 校验
@@ -32,7 +32,7 @@ public class PHeader {
     }
 
     public void validate() {
-        if (magic != Constants.MAGIC || metaSize <= 0 || bodySize <= 0) {
+        if (magic != Constants.PRPC_MAGIC || metaSize <= 0 || bodySize <= 0) {
             throw new PRPCException("invalid protocol");
         }
     }

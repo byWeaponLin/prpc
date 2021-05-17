@@ -13,7 +13,9 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,19 +112,19 @@ public class DubboZooKeeperRegistry extends AbstractRegistry {
                 String providerPath = servicePath + SEPARATOR + "providers";
                 createZkPathIfNotExist(providerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
-                String serverPath = dubboProviderPath(group, service);
+                String serverPath = providerPath + SEPARATOR + dubboProviderPath(group, service);
                 createZkPathIfNotExist(serverPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 log.info("register service [{}] success, group: {}, provider info: {}",
                         service.getName(), groupName, providerPath);
             }
 
-        } catch (KeeperException | InterruptedException e) {
+        } catch (Exception e) {
             log.error("register group service failed, group: {}", group, e);
             throw new PRPCException("register group service failed, group: " + group, e);
         }
     }
 
-    private String dubboProviderPath(PGroup group, Class<?> service) {
+    private String dubboProviderPath(PGroup group, Class<?> service) throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
         String methods = Stream.of(service.getDeclaredMethods()).map(Method::getName)
                 .sorted()
@@ -144,7 +146,7 @@ public class DubboZooKeeperRegistry extends AbstractRegistry {
                 .append("side=provider&")
                 .append("timestamp=").append(System.currentTimeMillis());
 
-        return sb.toString();
+        return URLEncoder.encode(sb.toString(), "UTF-8");
     }
 
     private void createZkPathIfNotExist(String path, byte[] value, List<ACL> acl, CreateMode createMode)
@@ -164,11 +166,11 @@ public class DubboZooKeeperRegistry extends AbstractRegistry {
         groupMap.forEach((group, services) -> {
             if (CollectionUtils.isNotEmpty(services)) {
                 services.forEach(service -> {
-                    String providerPath = dubboProviderPath(group, service);
-                    String serverPath = basePath + SEPARATOR + service.getName()
-                            + SEPARATOR + "providers"
-                            + SEPARATOR + providerPath;
                     try {
+                        String providerPath = dubboProviderPath(group, service);
+                        String serverPath = basePath + SEPARATOR + service.getName()
+                                + SEPARATOR + "providers"
+                                + SEPARATOR + providerPath;
                         zooKeeper.delete(serverPath, -1);
                         log.info("unregister service [{}] success, serverPort: {}", service.getName(), serverPort);
                     } catch (Exception e) {

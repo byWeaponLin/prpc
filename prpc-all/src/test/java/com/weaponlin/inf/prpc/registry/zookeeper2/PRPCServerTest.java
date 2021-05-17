@@ -14,7 +14,7 @@ public class PRPCServerTest {
         prpConfig.setRegistryCenter(registryCenter);
         PRPConfig.PGroup group = new PRPConfig.PGroup();
         group.setCodec("fastjson");
-        group.setProtocol("prpc");
+        group.setProtocol("dubbo");
         group.setBasePackage("com.weaponlin.inf.prpc.api");
         prpConfig.setGroups(Lists.newArrayList(group));
         new PRPCServer(prpConfig).start();

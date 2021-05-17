@@ -23,7 +23,8 @@ an rpc framework
 - [ ] 序列化协议
     - [x] protobuf
     - [x] jackson
-    - [ ] fastjson
+    - [x] fastjson
+    - [ ] hessian
 - [ ] 应用协议兼容
     - [ ] dubbo
     - [ ] http
@@ -53,6 +54,7 @@ an rpc framework
 - [ ] ServiceLoader优化，静态代码块，在使用的时候采取加载初始化，导致获取service太慢了
 - [ ] 限制请求大小
 - [ ] ByteBuf.release() was not called before it's garbage-collected. See https://netty.io/wiki/reference-counted-objects.html
+- [ ] meta里添加rpc version等信息，方便后续扩展
 
 ## 4 Quick Start
 
