@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.loader.Extension;
+import com.weaponlin.inf.prpc.protocol.dubbo.DubboRequest;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 
@@ -48,9 +49,25 @@ public class FastjsonCodec implements PCodec {
                 res.setServiceName(jsonObject.getString("serviceName"));
                 res.setMethodName(jsonObject.getString("methodName"));
                 res.setResultType(jsonObject.getObject("resultType", Class.class));
-                // TODO 需要判断result属性中的参数
+                // TODO 需要递归判断result属性中的参数
                 res.setResult(jsonObject.getObject("result", res.getResultType()));
                 return res;
+            } else if (o instanceof DubboRequest) {
+                DubboRequest req = jsonObject.toJavaObject(DubboRequest.class);
+                JSONArray typeArray = jsonObject.getJSONArray("parameterTypes");
+                Class<?>[] parameterTypes = new Class[typeArray.size()];
+                for (int i = 0; i < typeArray.size(); i++) {
+                    parameterTypes[i] = Class.forName(typeArray.getString(i));
+                }
+                req.setParameterTypes(parameterTypes);
+                //
+                JSONArray paramArray = jsonObject.getJSONArray("arguments");
+                Object[] params = new Object[paramArray.size()];
+                for (int i = 0; i < paramArray.size(); i++) {
+                    params[i] = paramArray.getObject(i, parameterTypes[i]);
+                }
+                req.setArguments(params);
+                return req;
             }
             return JSONObject.parseObject(json).toJavaObject(o.getClass());
         } catch (Exception e) {

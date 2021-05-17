@@ -24,7 +24,7 @@ an rpc framework
     - [x] protobuf
     - [x] jackson
     - [x] fastjson
-    - [ ] hessian
+    - [ ] hessian2
 - [ ] 应用协议兼容
     - [ ] dubbo
     - [ ] http

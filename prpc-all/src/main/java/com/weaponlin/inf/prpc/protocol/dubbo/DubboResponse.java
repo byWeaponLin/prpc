@@ -3,9 +3,12 @@ package com.weaponlin.inf.prpc.protocol.dubbo;
 import com.alibaba.com.caucho.hessian.io.Hessian2Input;
 import com.alibaba.com.caucho.hessian.io.Hessian2Output;
 import com.weaponlin.inf.prpc.constants.Constants;
+import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
+import com.weaponlin.inf.prpc.protocol.prpc.PPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,7 +18,8 @@ import java.util.Map;
  * TODO
  */
 @Data
-public class DubboResponse {
+@Accessors(chain = true)
+public class DubboResponse implements PPacket {
     private byte responseType;
     private Object result = null;
     private Throwable exception = null;
@@ -103,5 +107,10 @@ public class DubboResponse {
                 inputStream.close();
             }
         }
+    }
+
+    @Override
+    public PMeta getMeta() {
+        return new PMeta();
     }
 }
