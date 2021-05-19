@@ -1,6 +1,7 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.weaponlin.inf.prpc.protocol.PPacket;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,8 @@ public class PRequest implements PPacket, Serializable {
 
     private Class<?>[] parameterTypes;
 
+    private boolean heartbeat;
+
     /**
      * TODO
      */
@@ -38,8 +41,14 @@ public class PRequest implements PPacket, Serializable {
     public PMeta getMeta() {
         return new PMeta().setRequestId(requestId)
                 .setServiceName(serviceName)
-                .setMethodName(methodName);
+                .setMethodName(methodName)
+                .setParameterTypes(parameterTypes)
+                .setParams(params);
     }
 
-
+    @Override
+    @JsonIgnore
+    public boolean isHeartbeat() {
+        return false;
+    }
 }

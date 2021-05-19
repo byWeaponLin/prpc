@@ -2,7 +2,6 @@ package com.weaponlin.inf.prpc.protocol.dubbo;
 
 import com.weaponlin.inf.prpc.constants.Constants;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import lombok.Data;
 
 @Data
@@ -13,14 +12,12 @@ public class DubboHeader {
     private long correlationId;
     private int bodyLength;
 
-    public ByteBuf encode() {
-        ByteBuf byteBuf = Unpooled.buffer(Constants.DUBBO_FIXED_HEAD_LEN);
+    public void encode(ByteBuf byteBuf) {
         byteBuf.writeShort(Constants.DUBBO_MAGIC);
         byteBuf.writeByte(flag);
         byteBuf.writeByte(status);
         byteBuf.writeLong(correlationId);
         byteBuf.writeInt(bodyLength);
-        return byteBuf;
     }
 
     public static DubboHeader decode(ByteBuf byteBuf) {

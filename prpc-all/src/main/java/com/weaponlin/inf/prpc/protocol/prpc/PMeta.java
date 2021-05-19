@@ -15,6 +15,10 @@ public class PMeta {
 
     private String methodName;
 
+    private Class<?>[] parameterTypes;
+
+    private Object[] params;
+
     public void validate() {
         if (StringUtils.isBlank(requestId) || StringUtils.isBlank(serviceName)
                 || StringUtils.isBlank(methodName)) {

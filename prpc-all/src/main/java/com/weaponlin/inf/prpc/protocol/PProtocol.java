@@ -1,6 +1,5 @@
 package com.weaponlin.inf.prpc.protocol;
 
-import com.weaponlin.inf.prpc.protocol.prpc.PPacket;
 import io.netty.buffer.ByteBuf;
 
 public interface PProtocol {

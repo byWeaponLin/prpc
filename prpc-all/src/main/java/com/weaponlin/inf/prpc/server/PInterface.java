@@ -1,6 +1,5 @@
 package com.weaponlin.inf.prpc.server;
 
-import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,13 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -45,10 +42,10 @@ public class PInterface {
     private static Map<String, PInterface> cachedInstances = new ConcurrentHashMap<>();
 
     // TODO 适配其他协议
-    public static Pair<Object, Method> getInstanceAndMethod(String group, String serviceName, String methodName,
+    public static Pair<Object, Method> getInstanceAndMethod(String serviceName, String methodName,
                                                             Class<?>[] parameterTypes) {
         try {
-            PInterface pInterface = cachedInstances.get(serviceName + ":" + group);
+            PInterface pInterface = cachedInstances.get(serviceName);
             if (pInterface == null) {
                 Reflections reflections = new Reflections(serviceName);
                 final Class<?> apiClass = Class.forName(serviceName);
@@ -61,7 +58,7 @@ public class PInterface {
                         .serviceInstance(serviceInstance)
                         .methods(new ConcurrentHashMap<>())
                         .build();
-                cachedInstances.put(serviceName + ":" + group, pInterface);
+                cachedInstances.put(serviceName, pInterface);
             }
             return pInterface.getInstanceAndMethod(methodName, parameterTypes);
         } catch (Exception e) {

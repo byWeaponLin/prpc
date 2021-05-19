@@ -48,6 +48,7 @@ public class PDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         PProtocol pprotocol = PProtocolFactory.getProtocol(protocol, codec);
         pprotocol.decode(in, instance);
+        // TODO 返回PPacket
         out.add(pprotocol.getPacket(decodeClass));
     }
 }

@@ -12,8 +12,9 @@ public class PRPCServerTest {
         registryCenter.setNaming("zookeeper");
         registryCenter.setAddress("127.0.0.1:2181");
         prpConfig.setRegistryCenter(registryCenter);
+        prpConfig.setCodec("hessian2");
         PRPConfig.PGroup group = new PRPConfig.PGroup();
-        group.setCodec("fastjson");
+        group.setCodec("hessian2");
         group.setProtocol("dubbo");
         group.setBasePackage("com.weaponlin.inf.prpc.api");
         prpConfig.setGroups(Lists.newArrayList(group));

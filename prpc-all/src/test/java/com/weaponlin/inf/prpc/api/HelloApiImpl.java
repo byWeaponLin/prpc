@@ -6,7 +6,9 @@ public class HelloApiImpl implements HelloApi {
 
     public HelloResponse hello(Long userId, HelloRequest request) {
 
-        return HelloResponse.builder().greeting(RandomStringUtils.random(request.getSize(), true, true))
+        HelloResponse res = HelloResponse.builder().greeting(RandomStringUtils.random(request.getSize(), true, true))
                 .build();
+        System.out.println("invoke result: " + res);
+        return res;
     }
 }

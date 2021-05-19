@@ -1,6 +1,7 @@
 package com.weaponlin.inf.prpc.server;
 
-import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
+import com.weaponlin.inf.prpc.protocol.PPacket;
+import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,22 +17,29 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        PRequest request = (PRequest) msg;
-        PResponse response = PResponse.builder()
-                .requestId(request.getRequestId())
-                .serviceName(request.getServiceName())
-                .methodName(request.getMethodName())
-                .build();
-        try {
-            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(request.getGroup(),
-                    request.getServiceName(), request.getMethodName(), request.getParameterTypes());
+        PPacket packet = (PPacket) msg;
 
-            log.info("receive request, request id: {}, service: {}, method: {}", request.getRequestId(),
-                    request.getServiceName(), request.getMethodName());
+        PMeta meta = packet.getMeta();
+        PResponse response = PResponse.builder()
+                .requestId(meta.getRequestId())
+                .serviceName(meta.getServiceName())
+                .methodName(meta.getMethodName())
+                .build();
+        if (packet.isHeartbeat()) {
+            ctx.writeAndFlush(response);
+            ctx.close();
+            return;
+        }
+        try {
+            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(meta.getServiceName(),
+                    meta.getMethodName(), meta.getParameterTypes());
+
+            log.info("receive request, request id: {}, service: {}, method: {}", meta.getRequestId(),
+                    meta.getServiceName(), meta.getMethodName());
 
             Method methodInstance = instanceAndMethod.getRight();
             Object serviceInstance = instanceAndMethod.getKey();
-            Object result = methodInstance.invoke(serviceInstance, request.getParams());
+            Object result = methodInstance.invoke(serviceInstance, meta.getParams());
             response.setResult(result);
             response.setResultType(result.getClass());
         } catch (Exception e) {

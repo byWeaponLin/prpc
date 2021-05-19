@@ -107,7 +107,7 @@ public class PRPCServer {
             });
 
             // 先启动服务，再注册service到注册中心，暂时写死codec
-            startServer(protocolType, "fastjson", serverPort);
+            startServer(protocolType, "hessian2", serverPort);
 
         });
     }
@@ -131,8 +131,8 @@ public class PRPCServer {
                             ChannelPipeline pipeline = ch.pipeline();
 //                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-                            pipeline.addLast(new LengthFieldPrepender(4));
+//                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+//                            pipeline.addLast(new LengthFieldPrepender(4));
 
                             // 自定义序列化协议
                             pipeline.addLast(codecPair.getEncoder());

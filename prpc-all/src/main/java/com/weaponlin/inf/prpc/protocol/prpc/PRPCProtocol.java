@@ -2,6 +2,7 @@ package com.weaponlin.inf.prpc.protocol.prpc;
 
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.AbstractProtocol;
+import com.weaponlin.inf.prpc.protocol.PPacket;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
