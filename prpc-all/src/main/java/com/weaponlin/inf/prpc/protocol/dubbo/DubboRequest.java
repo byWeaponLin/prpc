@@ -29,11 +29,12 @@ public class DubboRequest implements PPacket {
     private Map<String, String> attachments = new HashMap<String, String>();
     @Setter
     private boolean isHeartbeat = false;
+    private long correlationId;
 
 
     @Override
     public PMeta getMeta() {
-        return new PMeta().setServiceName(path).setMethodName(methodName)
+        return new PMeta().setServiceName(path).setMethodName(methodName).setRequestId(String.valueOf(correlationId))
                 .setParameterTypes(parameterTypes).setParams(arguments);
     }
 

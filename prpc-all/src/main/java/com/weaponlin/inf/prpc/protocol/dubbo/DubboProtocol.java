@@ -47,7 +47,7 @@ public class DubboProtocol extends AbstractProtocol {
             PResponse res = (PResponse) msg;
             DubboHeader dubboHeader = new DubboHeader();
             dubboHeader.setFlag(FLAG_EVENT);
-            dubboHeader.setCorrelationId(111111111);
+            dubboHeader.setCorrelationId(Long.valueOf(res.getMeta().getRequestId()));
             dubboHeader.setStatus(DubboConstants.RESPONSE_OK);
 
             DubboResponse responseBody = new DubboResponse();
