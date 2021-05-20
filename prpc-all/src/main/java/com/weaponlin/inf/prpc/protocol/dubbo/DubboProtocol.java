@@ -1,16 +1,16 @@
 package com.weaponlin.inf.prpc.protocol.dubbo;
 
-import com.sun.tools.jdi.Packet;
+import com.alibaba.com.caucho.hessian.io.Hessian2Output;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.protocol.AbstractProtocol;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import com.weaponlin.inf.prpc.protocol.PPacket;
-import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
 import com.weaponlin.inf.prpc.protocol.prpc.PResponse;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.weaponlin.inf.prpc.protocol.dubbo.DubboConstants.FLAG_EVENT;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * TODO
@@ -45,15 +45,21 @@ public class DubboProtocol extends AbstractProtocol {
     public void encode(ByteBuf byteBuf, Object msg) {
         try {
             PResponse res = (PResponse) msg;
-            DubboHeader dubboHeader = new DubboHeader();
-            dubboHeader.setFlag(FLAG_EVENT);
-            dubboHeader.setCorrelationId(Long.valueOf(res.getMeta().getRequestId()));
-            dubboHeader.setStatus(DubboConstants.RESPONSE_OK);
 
-            DubboResponse responseBody = new DubboResponse();
-            responseBody.setResult(res.getResult());
-            responseBody.setResponseType(DubboConstants.RESPONSE_VALUE);
-            byte[] bodyBytes = encode(responseBody);
+            DubboHeader dubboHeader = new DubboHeader();
+            dubboHeader.setCorrelationId(Long.valueOf(res.getRequestId()));
+            dubboHeader.setStatus(DubboConstants.RESPONSE_OK);
+            byte[] bodyBytes = null;
+            if (res.isHeartbeat()) {
+                dubboHeader.setFlag(DubboConstants.FLAG_HEARTBEAT);
+                bodyBytes = encodeHeartbeatBody();
+            } else {
+                dubboHeader.setFlag(DubboConstants.FLAG_RESPONSE);
+                DubboResponse responseBody = new DubboResponse();
+                responseBody.setResult(res.getResult());
+                responseBody.setResponseType(DubboConstants.RESPONSE_VALUE);
+                bodyBytes = encode(responseBody);
+            }
 
             dubboHeader.setBodyLength(bodyBytes.length);
             dubboHeader.encode(byteBuf);
@@ -61,6 +67,15 @@ public class DubboProtocol extends AbstractProtocol {
         } catch (Exception e) {
             throw new PRPCException("encode dubbo request/response failed", e);
         }
+    }
+
+    private byte[] encodeHeartbeatBody() throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Hessian2Output hessian2Output = new Hessian2Output(outputStream);
+        hessian2Output.writeString(DubboConstants.HEARTBEAT_EVENT);
+        hessian2Output.flushBuffer();
+        byte[] bodyBytes = outputStream.toByteArray();
+        return bodyBytes;
     }
 
     @Override
@@ -76,7 +91,7 @@ public class DubboProtocol extends AbstractProtocol {
         if (header.getMagic() != DubboConstants.MAGIC) {
             throw new PRPCException("dubbo protocol magic num is invalid, magic num: " + header.getMagic());
         }
-        if ((header.getFlag() & DubboConstants.FLAG_EVENT) != 0) {
+        if ((header.getFlag() & DubboConstants.FLAG_HEARTBEAT) != 0) {
             // 心跳检测
             if (header.getBodyLength() <= 1) {
                 this.request = (DubboRequest) msg;
@@ -91,6 +106,7 @@ public class DubboProtocol extends AbstractProtocol {
             msg = decode(bodyBytes, msg);
             if (msg instanceof DubboRequest) {
                 this.request = (DubboRequest) msg;
+                this.request.setInvokeId(header.getCorrelationId());
 
             } else {
                 throw new PRPCException("invalid dubbo request body");

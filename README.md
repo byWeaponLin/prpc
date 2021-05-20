@@ -26,7 +26,7 @@ an rpc framework
     - [x] fastjson
     - [ ] hessian2
 - [ ] 应用协议兼容
-    - [ ] dubbo
+    - [x] dubbo(还存在问题)
     - [ ] http
     - [ ] brpc
 - [ ] 限流
@@ -55,6 +55,7 @@ an rpc framework
 - [ ] 限制请求大小
 - [ ] ByteBuf.release() was not called before it's garbage-collected. See https://netty.io/wiki/reference-counted-objects.html
 - [ ] meta里添加rpc version等信息，方便后续扩展
+- [ ] 支持dubbo协议，但是没调用几次provider就会关闭，consumer提示provider关闭了
 
 ## 4 Quick Start
 

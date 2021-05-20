@@ -3,7 +3,9 @@ package com.weaponlin.inf.prpc.protocol.dubbo;
 public class DubboConstants {
     public static final int FIXED_HEAD_LEN = 16;
     public static final short MAGIC = (short) 0xdabb;
-    protected static final byte FLAG_EVENT = (byte) 0x20;
+    public static final byte FLAG_REQUEST = (byte) 0x80;
+    public static final byte FLAG_RESPONSE = (byte) 0x40;
+    public static final byte FLAG_HEARTBEAT = (byte) 0x20;
     public static final byte HESSIAN2_SERIALIZATION_ID = 2;
     public static final String DEFAULT_DUBBO_PROTOCOL_VERSION = "2.7.5";
     public static final byte RESPONSE_OK = 20;

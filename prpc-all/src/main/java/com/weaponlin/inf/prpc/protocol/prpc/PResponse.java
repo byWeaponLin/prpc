@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.weaponlin.inf.prpc.protocol.PPacket;
+import com.weaponlin.inf.prpc.protocol.AbstractPacket;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PResponse implements PPacket, Serializable {
+public class PResponse extends AbstractPacket implements Serializable {
     private static final long serialVersionUID = 4271546719542089640L;
 
     private String requestId;
@@ -37,10 +37,5 @@ public class PResponse implements PPacket, Serializable {
         return new PMeta().setRequestId(requestId)
                 .setServiceName(serviceName)
                 .setMethodName(methodName);
-    }
-
-    @Override
-    public boolean isHeartbeat() {
-        return false;
     }
 }

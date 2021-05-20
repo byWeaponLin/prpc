@@ -26,6 +26,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 .methodName(meta.getMethodName())
                 .build();
         if (packet.isHeartbeat()) {
+            response.setHeartbeat(packet.isHeartbeat());
             ctx.writeAndFlush(response);
             ctx.close();
             return;

@@ -1,7 +1,7 @@
 package com.weaponlin.inf.prpc.protocol.prpc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.weaponlin.inf.prpc.protocol.PPacket;
+import com.weaponlin.inf.prpc.protocol.AbstractPacket;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PRequest implements PPacket, Serializable {
+public class PRequest extends AbstractPacket implements Serializable {
     private static final long serialVersionUID = -9031849935007421804L;
 
     private String group;
@@ -29,8 +29,6 @@ public class PRequest implements PPacket, Serializable {
 
     private Class<?>[] parameterTypes;
 
-    private boolean heartbeat;
-
     /**
      * TODO
      */
@@ -44,11 +42,5 @@ public class PRequest implements PPacket, Serializable {
                 .setMethodName(methodName)
                 .setParameterTypes(parameterTypes)
                 .setParams(params);
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean isHeartbeat() {
-        return false;
     }
 }

@@ -3,8 +3,8 @@ package com.weaponlin.inf.prpc.protocol.dubbo;
 import com.alibaba.com.caucho.hessian.io.Hessian2Input;
 import com.alibaba.com.caucho.hessian.io.Hessian2Output;
 import com.weaponlin.inf.prpc.constants.Constants;
+import com.weaponlin.inf.prpc.protocol.AbstractPacket;
 import com.weaponlin.inf.prpc.protocol.prpc.PMeta;
-import com.weaponlin.inf.prpc.protocol.PPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import lombok.Data;
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Data
 @Accessors(chain = true)
-public class DubboResponse implements PPacket {
+public class DubboResponse extends AbstractPacket {
     private byte responseType;
     private Object result = null;
     private Throwable exception = null;
@@ -112,10 +112,5 @@ public class DubboResponse implements PPacket {
     @Override
     public PMeta getMeta() {
         return new PMeta();
-    }
-
-    @Override
-    public boolean isHeartbeat() {
-        return false;
     }
 }

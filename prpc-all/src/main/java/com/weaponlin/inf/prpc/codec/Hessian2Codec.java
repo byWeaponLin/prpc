@@ -8,15 +8,14 @@ import com.weaponlin.inf.prpc.loader.Extension;
 import com.weaponlin.inf.prpc.protocol.dubbo.DubboConstants;
 import com.weaponlin.inf.prpc.protocol.dubbo.DubboRequest;
 import com.weaponlin.inf.prpc.protocol.dubbo.DubboResponse;
-import com.weaponlin.inf.prpc.server.PInterface;
+import com.weaponlin.inf.prpc.protocol.dubbo.ReflectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 @Slf4j
@@ -64,19 +63,15 @@ public class Hessian2Codec implements PCodec {
                 requestBody.setVersion(hessian2Input.readString());
                 requestBody.setMethodName(hessian2Input.readString());
 
-                String serviceName = requestBody.getPath();
-                String methodName = requestBody.getMethodName();
-                Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(serviceName, methodName);
-                Class<?>[] parameterTypes = instanceAndMethod.getRight().getParameterTypes();
-
                 Object[] args;
                 Class<?>[] pts;
-                String desc = hessian2Input.readString();
-                if (desc.length() == 0) {
+                String parameterTypeDesc = hessian2Input.readString();
+                if (StringUtils.isBlank(parameterTypeDesc)) {
                     pts = new Class<?>[0];
                     args = new Object[0];
                 } else {
-                    pts = new Class[parameterTypes.length];
+                    Class<?>[] parameterTypes = ReflectUtils.desc2classArray(parameterTypeDesc);
+                    pts = parameterTypes;
                     args = new Object[parameterTypes.length];
                     for (int i = 0; i < args.length; i++) {
                         try {
