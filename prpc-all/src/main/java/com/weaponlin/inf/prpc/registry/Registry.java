@@ -1,5 +1,7 @@
 package com.weaponlin.inf.prpc.registry;
 
+import java.util.List;
+
 public interface Registry {
 
     String PROVIDER_PATH = "/provider";
@@ -17,6 +19,8 @@ public interface Registry {
     void subscribe(Class<?> service);
 
     void unsubscribe();
+
+    List<Class<?>> getServices();
 
     @Deprecated
     void nodeChanged();

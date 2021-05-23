@@ -1,11 +1,13 @@
 package com.weaponlin.inf.prpc.registry.zookeeper;
 
+import com.google.common.collect.Lists;
 import com.weaponlin.inf.prpc.annotation.PRPC;
+import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.registry.AbstractRegistry;
-import com.weaponlin.inf.prpc.utils.NetUtils;
 import com.weaponlin.inf.prpc.remote.URI;
-import com.google.common.collect.Lists;
+import com.weaponlin.inf.prpc.utils.ClassScanUtil;
+import com.weaponlin.inf.prpc.utils.NetUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -17,12 +19,16 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -45,7 +51,6 @@ import static java.util.stream.Collectors.toSet;
  * | ......
  */
 @Slf4j
-@Deprecated
 public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     public static final String REGISTRY = "zookeeper";
@@ -56,22 +61,27 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     private static final byte[] EMPTY_BYTES = "".getBytes();
 
-    private int port;
+    private int serverPort;
 
     /**
      * TODO
      */
-    private List<Class<?>> serviceList;
+    private List<PRPConfig.PGroup> groups;
 
     private Map<String, List<Class<?>>> groupService = new ConcurrentHashMap<>();
+
+    private PRPConfig.PRegistryCenter registryCenter;
 
     private ZooKeeper zooKeeper;
 
     private String basePath;
 
-    public PRPCZooKeeperRegistry(int port, String address, int connectionTimeout) {
-        this.port = port;
-        this.init(address, connectionTimeout);
+    public PRPCZooKeeperRegistry(PRPConfig.PRegistryCenter registryCenter, List<PRPConfig.PGroup> groups,
+                                 int serverPort, int connectionTimeout) {
+        this.serverPort = serverPort;
+        this.groups = groups;
+        this.registryCenter = registryCenter;
+        this.init(registryCenter.getAddress(), connectionTimeout);
     }
 
     private void init(String address, int connectionTimeout) {
@@ -95,37 +105,54 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public void register() {
-        if (CollectionUtils.isEmpty(serviceList)) {
-            log.warn("service list is empty");
+        if (CollectionUtils.isEmpty(groups)) {
+            log.warn("group list is empty");
             return;
         }
-        serviceList.stream().filter(Objects::nonNull).forEach(this::register);
+        groups.stream().forEach(group -> {
+            String basePackage = group.getBasePackage();
+            List<Class<?>> serviceList = ClassScanUtil.getInterface(basePackage);
+            group.setServices(serviceList);
+            register(group, serviceList);
+        });
+    }
+
+    private void register(PRPConfig.PGroup group, List<Class<?>> serviceList) {
+        String groupName = group.getGroup();
+        if (!groupService.containsKey(groupName)) {
+            groupService.put(groupName, serviceList);
+        } else {
+            groupService.get(groupName).addAll(serviceList);
+        }
+        try {
+            for (Class<?> service : serviceList) {
+                String servicePath = basePath + SEPARATOR + service.getName() + ":" + groupName;
+                createZkPathIfNotExist(servicePath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+
+                String providerPath = servicePath + SEPARATOR + "provider";
+                createZkPathIfNotExist(providerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+
+                String serverPath = providerPath + SEPARATOR + getServerUri(group);
+                createZkPathIfNotExist(serverPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                log.info("register service [{}] success, group: {}, provider info: {}", service.getName(), group, serverPath);
+            }
+
+        } catch (Exception e) {
+            log.error("register group service failed, group: {}", group, e);
+            throw new PRPCException("register group service failed, group: " + group, e);
+        }
+    }
+
+    private String getServerUri(PRPConfig.PGroup group) throws UnsupportedEncodingException {
+        String serverUri = "prpc://" + NetUtils.getLocalHost() + ":" + serverPort + "?protocol=prpc&codec="
+                + group.getCodec() + "&group=" + group.getGroup();
+        return URLEncoder.encode(serverUri, "UTF-8");
     }
 
     @Override
+    @Deprecated
     public void register(Class<?> service) {
-        PRPC prpc = service.getAnnotation(PRPC.class);
-        String group = Optional.ofNullable(prpc).map(e -> e.group()).orElse("default");
-        if (!groupService.containsKey(group)) {
-            groupService.put(group, Lists.newArrayList(service));
-        } else {
-            groupService.get(group).add(service);
-        }
-        try {
-            String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
-            createZkPathIfNotExist(servicePath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-            String providerPath = servicePath + SEPARATOR + "provider";
-            createZkPathIfNotExist(providerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-            String server = NetUtils.getLocalHost() + ":" + port;
-            String serverPath = providerPath + SEPARATOR + server;
-            createZkPathIfNotExist(serverPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-
-            log.info("register service [{}] success, provider info: {}", service.getName(), server);
-        } catch (KeeperException | InterruptedException e) {
-            log.error("register service [{}] failed", service.getName(), e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     private void createZkPathIfNotExist(String path, byte[] value, List<ACL> acl, CreateMode createMode)
@@ -137,17 +164,18 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public void unregister() {
-        groupService.forEach((group, services) -> {
+        groups.forEach(group -> {
+            List<Class<?>> services = group.getServices();
             if (CollectionUtils.isNotEmpty(services)) {
                 services.forEach(service -> {
-                    String serverPath = basePath + SEPARATOR + service.getName() + ":" + group
-                            + SEPARATOR + "provider"
-                            + SEPARATOR + NetUtils.getLocalHost() + ":" + port;
                     try {
+                        String serverPath = basePath + SEPARATOR + service.getName() + ":" + group.getGroup()
+                                + SEPARATOR + "provider"
+                                + SEPARATOR + getServerUri(group);
                         zooKeeper.delete(serverPath, -1);
-                        log.info("unregister service [{}] success, port: {}", service.getName(), port);
+                        log.info("unregister service [{}] success, serverPort: {}", service.getName(), serverPort);
                     } catch (Exception e) {
-                        log.error("unregister service [{}] failed, port: {}", service.getName(), port);
+                        log.error("unregister service [{}] failed, serverPort: {}", service.getName(), serverPort, e);
                     }
                 });
             }
@@ -157,29 +185,27 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void subscribe() {
         refresh();
-        try {
-            if (MapUtils.isNotEmpty(groupService)) {
-                groupService.forEach((group, services) -> {
-                    services.stream().filter(Objects::nonNull).forEach(service -> {
-                        try {
-                            String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
-                            String providerPath = servicePath + SEPARATOR + "provider";
+        groups.stream().forEach(group -> {
+            String basePackage = group.getBasePackage();
+            List<Class<?>> serviceList = ClassScanUtil.getInterface(basePackage);
+            group.setServices(serviceList);
+            groupService.putIfAbsent(group.getGroup(), serviceList);
+            serviceList.forEach(service -> {
+                try {
+                    String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
+                    String providerPath = servicePath + SEPARATOR + "provider";
 
-                            zooKeeper.addWatch(providerPath, watchedEvent -> {
-                                log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(),
-                                        watchedEvent.getState());
-                                refresh();
-                            }, AddWatchMode.PERSISTENT);
-                        } catch (Exception e) {
-                            log.error("zk watch failed", e);
-                        }
-                    });
-                });
-            }
-        } catch (Exception e) {
-            log.error("zk watch failed", e);
-            throw new PRPCException("zk watch failed", e);
-        }
+                    zooKeeper.addWatch(providerPath, watchedEvent -> {
+                        log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(),
+                                watchedEvent.getState());
+                        refresh();
+                    }, AddWatchMode.PERSISTENT);
+                    refresh();
+                } catch (Exception e) {
+                    log.error("zk watch failed", e);
+                }
+            });
+        });
     }
 
     @Override
@@ -222,6 +248,12 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
     }
 
     @Override
+    public List<Class<?>> getServices() {
+        return groupService.values().stream().flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void nodeChanged() {
 
     }
@@ -253,7 +285,7 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
                             String consumerServerPath = consumerPath + SEPARATOR + consumer;
                             createZkPathIfNotExist(consumerServerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                         } catch (Exception e) {
-                            log.error("discovery service failed, service: {}, group: {}", service.getName(), group);
+                            log.error("discovery service failed, service: {}, group: {}", service.getName(), group, e);
                         }
                     });
                 });

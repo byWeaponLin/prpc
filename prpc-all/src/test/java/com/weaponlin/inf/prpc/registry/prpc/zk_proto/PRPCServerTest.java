@@ -14,7 +14,6 @@ public class PRPCServerTest {
         prpConfig.setRegistryCenter(registryCenter);
         prpConfig.setCodec("protobuf");
         PRPConfig.PGroup group = new PRPConfig.PGroup();
-        group.setCodec("protobuf");
         group.setProtocol("prpc");
         group.setBasePackage("com.weaponlin.inf.prpc.api");
         prpConfig.setGroups(Lists.newArrayList(group));

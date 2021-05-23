@@ -16,9 +16,11 @@ import org.apache.zookeeper.data.ACL;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.weaponlin.inf.prpc.config.PRPConfig.PGroup;
@@ -194,6 +196,12 @@ public class DubboZooKeeperRegistry extends AbstractRegistry {
     @Override
     public void unsubscribe() {
         throw new UnsupportedOperationException("not support for dubbo protocol");
+    }
+
+    @Override
+    public List<Class<?>> getServices() {
+        return groupService.values().stream().flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override

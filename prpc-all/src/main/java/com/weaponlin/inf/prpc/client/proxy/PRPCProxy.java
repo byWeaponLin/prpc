@@ -1,18 +1,14 @@
 package com.weaponlin.inf.prpc.client.proxy;
 
 
-import com.weaponlin.inf.prpc.annotation.PRPC;
-import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.protocol.prpc.PRequest;
-import com.weaponlin.inf.prpc.config.PConfig;
 import com.weaponlin.inf.prpc.requestor.PClientRequestor;
 import com.weaponlin.inf.prpc.requestor.PRequestor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -22,19 +18,22 @@ public class PRPCProxy implements InvocationHandler {
 
     private PRequestor pRequestor;
 
-    public PRPCProxy(Class<?> clazz, PConfig config) {
+    private PRPConfig.PGroup group;
+
+    public PRPCProxy(Class<?> clazz, PRPConfig.PGroup group) {
         this.clazz = clazz;
-        this.pRequestor = new PClientRequestor(config);
+        this.group = group;
+        this.pRequestor = new PClientRequestor(group);
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        final String group = Optional.of(clazz.getAnnotation(PRPC.class)).map(PRPC::group).filter(StringUtils::isNotBlank)
-                .orElseThrow(() -> new PRPCException("api class must annotate with @PRPC"));
+    public Object invoke(Object proxy, Method method, Object[] args) {
+        String groupName = this.group.getGroup();
+        String requestId = UUID.randomUUID().toString();
         final PRequest request = PRequest.builder()
-                .requestId("1111")
+                .requestId(requestId)
                 .serviceName(clazz.getName())
                 .methodName(method.getName())
-                .group(group)
+                .group(groupName)
                 .params(args)
                 .parameterTypes(method.getParameterTypes())
                 .build();

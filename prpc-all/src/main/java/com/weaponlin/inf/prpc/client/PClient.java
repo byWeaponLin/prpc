@@ -1,18 +1,16 @@
 package com.weaponlin.inf.prpc.client;
 
-import com.weaponlin.inf.prpc.annotation.PRPC;
-import com.weaponlin.inf.prpc.config.PConfig;
+import com.google.common.collect.Lists;
+import com.weaponlin.inf.prpc.codec.CodecType;
+import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import com.weaponlin.inf.prpc.registry.Registry;
 import com.weaponlin.inf.prpc.registry.RegistryFactory;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,48 +18,75 @@ public class PClient {
 
     private Map<Class<?>, Object> serviceInstances = new ConcurrentHashMap<>();
 
-    private PConfig config;
+    private PRPConfig config;
 
-    private Map<String, GroupRegistry> groupRegistry;
+    private Map<Class<?>, Registry> registryMap;
 
-    private Map<String, Registry> registryMap;
+    private Map<Class<?>, PRPConfig.PGroup> serviceGroup;
 
-    public PClient(PConfig config) {
-        this.groupRegistry = new ConcurrentHashMap<>();
+    public PClient(PRPConfig config) {
         this.registryMap = new ConcurrentHashMap<>();
-        configValidate(config);
+        this.serviceGroup = new ConcurrentHashMap<>();
         this.config = config;
+        complementConfig();
+        configValidate(config);
+        init();
     }
 
     @SuppressWarnings("unchecked")
     public synchronized <T> T getService(@NonNull Class<T> service) {
-        final PRPC prpc = service.getAnnotation(PRPC.class);
-        if (prpc == null || StringUtils.isBlank(prpc.group())) {
-            throw new PRPCException("class must annotate with @PRPC or group cant be blank");
-        }
-
         if (!serviceInstances.containsKey(service)) {
-            final Registry registry = getRegistry(prpc.group());
+            final Registry registry = registryMap.get(service);
             registry.subscribe(service);
-            serviceInstances.putIfAbsent(service, PServiceFactory.getService(service, config));
+            serviceInstances.putIfAbsent(service, PServiceFactory.getService(service,
+                    serviceGroup.get(service)));
         }
         return (T) serviceInstances.get(service);
     }
 
-    private Registry getRegistry(String group) {
-        if (!groupRegistry.containsKey(group) && StringUtils.isBlank(config.getAddress())) {
-            throw new PRPCException("cant find zookeeper for group " + group);
-        }
-        groupRegistry.putIfAbsent(group, new GroupRegistry(config.getAddress()));
-        GroupRegistry groupRegistry = this.groupRegistry.get(group);
-        final String registryAddress = groupRegistry.getAddress();
-        if (registryMap.containsKey(registryAddress)) {
-            return registryMap.get(registryAddress);
-        } else {
-            Registry registry = RegistryFactory.createRegistry(config, 0);
-            registryMap.put(registryAddress, registry);
-            return registry;
-        }
+    private void init() {
+        config.getGroups().forEach(group -> {
+            Registry registry = RegistryFactory.createRegistry(group.getRegistryCenter(), Lists.newArrayList(group),
+                    ProtocolType.prpc, 0);
+            registry.subscribe();
+            registry.getServices().forEach(service -> {
+                registryMap.put(service, registry);
+                serviceGroup.put(service, group);
+                serviceInstances.putIfAbsent(service, PServiceFactory.getService(service, group));
+            });
+        });
+    }
+
+    private void complementConfig() {
+        config.getGroups().forEach(group -> {
+            if (group.getRegistryCenter() == null) {
+                Optional.ofNullable(config.getRegistryCenter()).ifPresent(group::setRegistryCenter);
+            }
+            if (group.getConnectionTimeouts() <= 0) {
+                Optional.ofNullable(config.getConnectionTimeout()).filter(e -> e <= 0)
+                        .ifPresent(group::setConnectionTimeouts);
+            }
+            if (StringUtils.isBlank(group.getCodec()) || !CodecType.contain(group.getCodec())) {
+                Optional.ofNullable(config.getCodec()).filter(StringUtils::isNotBlank)
+                        .filter(CodecType::contain)
+                        .ifPresent(group::setCodec);
+            }
+
+            if (StringUtils.isBlank(group.getProtocol()) || !ProtocolType.contain(group.getProtocol())) {
+                Optional.ofNullable(config.getProtocol()).filter(StringUtils::isNotBlank)
+                        .filter(ProtocolType::contain)
+                        .ifPresent(group::setProtocol);
+            }
+
+            if (StringUtils.isBlank(group.getGroup())) {
+                Optional.ofNullable(config.getGroup()).filter(StringUtils::isNotBlank)
+                        .ifPresent(group::setGroup);
+            }
+
+            if (StringUtils.isBlank(group.getBasePackage())) {
+                throw new PRPCException("service base package is blank, please check it");
+            }
+        });
     }
 
     /**
@@ -69,47 +94,7 @@ public class PClient {
      *
      * @param config
      */
-    private void configValidate(PConfig config) {
-        if (config == null) {
-            throw new PRPCException("config cant be null");
-        }
-
-        if (StringUtils.isBlank(config.getAddress())) {
-
-            if (CollectionUtils.isEmpty(config.getGroups())) {
-                throw new PRPCException("no valid zookeeper configuration");
-            }
-
-            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
-                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRPCException("group is invalid for it is blank"));
-                Optional.ofNullable(group.getAddress()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRPCException("invalid zookeeper configuration"));
-                groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(group.getAddress()));
-            });
-        } else {
-            if (CollectionUtils.isEmpty(config.getGroups())) {
-                return;
-            }
-            config.getGroups().stream().filter(Objects::nonNull).forEach(group -> {
-                Optional.ofNullable(group.getGroup()).filter(StringUtils::isNotBlank)
-                        .orElseThrow(() -> new PRPCException("group is invalid for it is blank"));
-                if (StringUtils.isNotBlank(group.getAddress())) {
-                    groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(group.getAddress()));
-                } else {
-                    groupRegistry.putIfAbsent(group.getGroup(), new GroupRegistry(config.getAddress()));
-                }
-            });
-        }
-    }
-
-    @Getter
-    @Setter
-    public static class GroupRegistry {
-        private String address;
-
-        public GroupRegistry(String address) {
-            this.address = address;
-        }
+    private void configValidate(PRPConfig config) {
+        // TODO
     }
 }
