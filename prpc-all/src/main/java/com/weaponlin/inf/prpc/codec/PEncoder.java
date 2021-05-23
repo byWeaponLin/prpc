@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,9 +19,10 @@ public class PEncoder extends MessageToByteEncoder {
 
     private Class encodeClass;
 
-    private String codec = "protobuf";
-
     private String protocol = "prpc";
+
+    @Setter
+    private String codec = "protobuf";
 
     public PEncoder(@NonNull Class encodeClass) {
         this.encodeClass = encodeClass;

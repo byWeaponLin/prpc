@@ -1,8 +1,15 @@
 package com.weaponlin.inf.prpc.remote;
 
+import com.weaponlin.inf.prpc.exception.PRPCException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
+
+import java.net.URLDecoder;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @EqualsAndHashCode
@@ -11,6 +18,12 @@ public class URI {
     private String host;
 
     private int port;
+
+    private String codec;
+
+    private String group;
+
+    private String protocol;
 
     public static URI newURI(String host, int port) {
         if (StringUtils.isBlank(host)) {
@@ -28,11 +41,33 @@ public class URI {
 
     /**
      *
-     * @param provider like: 127.0.0.1:8818
+     * @param provider like: 127.0.0.1:8818?protocol=prpc&codec=protobuf&group=default
      * @return
      */
     public static URI newURI(String provider) {
-        String[] split = provider.split(":");
-        return newURI(split[0], Integer.valueOf(split[1]));
+        try {
+            provider = URLDecoder.decode(provider, "UTF-8");
+            String[] split = provider.split("\\?");
+            String[] hosts = split[0].substring(7).split(":");
+            URI uri = newURI(hosts[0], Integer.valueOf(hosts[1]));
+            Map<String, String> params = Stream.of(split[1].split("&"))
+                    .map(e -> e.split("="))
+                    .collect(Collectors.toMap(a -> a[0], a -> a[1]));
+            Optional.ofNullable(params.get("protocol"))
+                    .filter(StringUtils::isNotBlank)
+                    .ifPresent(uri::setProtocol);
+
+            Optional.ofNullable(params.get("group"))
+                    .filter(StringUtils::isNotBlank)
+                    .ifPresent(uri::setGroup);
+
+            Optional.ofNullable(params.get("codec"))
+                    .filter(StringUtils::isNotBlank)
+                    .ifPresent(uri::setCodec);
+
+            return uri;
+        } catch (Exception e) {
+            throw new PRPCException("analysis provider uri failed, uri: " + provider);
+        }
     }
 }

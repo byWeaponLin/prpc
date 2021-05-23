@@ -45,9 +45,17 @@ public class PRPCServer {
      * -> k: registry
      * -> v: services
      */
-    private Map<String, Map<PRegistryCenter, List<PGroup>>> protocolRegistryMap;
+    private Map<String, Map<PRegistryCenter, Map<String, List<PGroup>>>> protocolRegistryMap;
 
-    private List<Registry> registries = new ArrayList<>();
+    private static List<Registry> registries = new ArrayList<>();
+
+
+    static {
+        // add shutdown hook to unregister service
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            registries.forEach(Registry::unregister);
+        }));
+    }
 
     public PRPCServer(@NonNull PRPConfig config) {
         this.config = config;
@@ -88,33 +96,32 @@ public class PRPCServer {
         });
 
         // 聚合数据
-        this.protocolRegistryMap = config.getGroups().stream()
-                .collect(groupingBy(PGroup::getProtocol,
-                        groupingBy(PGroup::getRegistryCenter)));
+        this.protocolRegistryMap = config.getGroups().stream().collect(groupingBy(PGroup::getProtocol,
+                groupingBy(PGroup::getRegistryCenter,
+                        groupingBy(PGroup::getCodec))));
     }
 
     public void start() {
-        // TODO
         protocolRegistryMap.forEach((protocol, registryCenters) -> {
             ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
-
-            int serverPort = PortUtils.getAvailablePort();
-
-            // 注册
-            registryCenters.forEach((registryCenter, groups) -> {
-                Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
-                registry.register();
+            registryCenters.forEach((registryCenter, codecGroups) -> {
+                codecGroups.forEach((codec, groups) -> {
+                    int serverPort = PortUtils.getAvailablePort();
+                    // 注册
+                    Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
+                    registry.register();
+                    registries.add(registry);
+                    log.info("start and register service success, ");
+                    startServer(protocolType, codec, serverPort);
+                    log.info("start server success, server port: {}", serverPort);
+                });
             });
-
-            // 先启动服务，再注册service到注册中心，暂时写死codec
-            startServer(protocolType, "hessian2", serverPort);
-
         });
     }
 
     private void startServer(ProtocolType protocolType, String codec, int serverPort) {
         // 创建主从EventLoopGroup
-        // TODO 一个协议一个端口
+        // 一个协议一个端口
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -131,12 +138,11 @@ public class PRPCServer {
                             ChannelPipeline pipeline = ch.pipeline();
 //                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
-//                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-//                            pipeline.addLast(new LengthFieldPrepender(4));
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthFieldPrepender(4));
 
                             // 自定义序列化协议
                             pipeline.addLast(codecPair.getEncoder());
-                            // TODO get protocolType from configuration
                             pipeline.addLast(codecPair.getDecoder());
 
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline

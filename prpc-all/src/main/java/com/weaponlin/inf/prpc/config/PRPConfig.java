@@ -139,10 +139,6 @@ public class PRPConfig {
          */
         private String basePackage = "";
 
-        /**
-         * just for test
-         */
-        @Deprecated
         private List<Class<?>> services;
     }
 

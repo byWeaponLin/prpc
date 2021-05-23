@@ -1,9 +1,10 @@
-package com.weaponlin.inf.prpc.registry.none;
+package com.weaponlin.inf.prpc.registry.prpc.zk_proto;
 
 import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.api.HelloRequest;
 import com.weaponlin.inf.prpc.client.PClient;
 import com.weaponlin.inf.prpc.config.PConfig;
+import com.weaponlin.inf.prpc.registry.zookeeper.PRPC2ZooKeeperRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,12 +16,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class NoneRegistryClientTest {
+public class ClientTest {
 
     public static void main(String[] args) {
         PConfig config = new PConfig();
-        config.setRegistry(NoneRegistry.REGISTRY);
-        config.setAddress("127.0.0.1:50697");
+        config.setRegistry(PRPC2ZooKeeperRegistry.REGISTRY);
+        config.setAddress("127.0.0.1:2181");
         HelloApi helloApi = new PClient(config).getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);
@@ -46,7 +47,11 @@ public class NoneRegistryClientTest {
                     e.printStackTrace();
                 }
             }
-            System.out.println("average cost: " + (costs.stream().mapToLong(e -> e).sum() / costs.size()) + ", requests: " + costs.size());
+            try {
+                System.out.println("average cost: " + (costs.stream().mapToLong(e -> e).sum() / costs.size()) + ", requests: " + costs.size());
+            } catch (Exception e) {
+
+            }
         }
         System.out.println("done");
     }

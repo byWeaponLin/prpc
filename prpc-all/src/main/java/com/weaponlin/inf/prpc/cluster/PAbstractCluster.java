@@ -28,12 +28,11 @@ abstract class PAbstractCluster implements PCluster {
 
     private LoadBalance loadBalance;
 
-    private PEncoder pEncoder;
+    private PEncoder encoder;
 
     PAbstractCluster(LoadBalance loadBalance) {
         this.loadBalance = loadBalance;
-        // TODO get protocolType from configuration
-        this.pEncoder = new PEncoder(PRequest.class, "fastjson");
+        this.encoder = new PEncoder(PRequest.class);
     }
 
     Object doRequest(PRequest request) {
@@ -42,6 +41,8 @@ abstract class PAbstractCluster implements PCluster {
         if (uri == null) {
             throw new PRPCException("can't select a server from load balancer");
         }
+        String codec = uri.getCodec();
+        encoder.setCodec(codec);
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         ClientHandler clientHandler = new ClientHandler();
         try {
@@ -59,9 +60,9 @@ abstract class PAbstractCluster implements PCluster {
                             pipeline.addLast(new LengthFieldPrepender(4));
 
                             // 自定义序列化协议
-                            pipeline.addLast(pEncoder);
+                            pipeline.addLast(encoder);
                             // TODO get protocolType from configuration
-                            pipeline.addLast(new PDecoder(PResponse.class, "fastjson"));
+                            pipeline.addLast(new PDecoder(PResponse.class, codec));
                             // 添加自己的业务逻辑，将服务注册的handle添加到pipeline
                             pipeline.addLast(clientHandler);
 

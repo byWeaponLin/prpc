@@ -19,6 +19,8 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,61 +110,47 @@ public class PRPC2ZooKeeperRegistry extends AbstractRegistry {
         groups.stream().forEach(group -> {
             String basePackage = group.getBasePackage();
             List<Class<?>> serviceList = ClassScanUtil.getInterface(basePackage);
-            register(group.getGroup(), serviceList);
+            group.setServices(serviceList);
+            register(group, serviceList);
         });
     }
 
-    private void register(String group, List<Class<?>> serviceList) {
-        if (!groupService.containsKey(group)) {
-            groupService.put(group, serviceList);
+    private void register(PRPConfig.PGroup group, List<Class<?>> serviceList) {
+        String groupName = group.getGroup();
+        if (!groupService.containsKey(groupName)) {
+            groupService.put(groupName, serviceList);
         } else {
-            groupService.get(group).addAll(serviceList);
+            groupService.get(groupName).addAll(serviceList);
         }
         try {
             for (Class<?> service : serviceList) {
-                String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
+                String servicePath = basePath + SEPARATOR + service.getName() + ":" + groupName;
                 createZkPathIfNotExist(servicePath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
                 String providerPath = servicePath + SEPARATOR + "provider";
                 createZkPathIfNotExist(providerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
-                String server = NetUtils.getLocalHost() + ":" + serverPort;
-                String serverPath = providerPath + SEPARATOR + server;
+                String serverPath = providerPath + SEPARATOR + getServerUri(group);
                 createZkPathIfNotExist(serverPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-                log.info("register service [{}] success, group: {}, provider info: {}", service.getName(), group, server);
+                log.info("register service [{}] success, group: {}, provider info: {}", service.getName(), group, serverPath);
             }
 
-        } catch (KeeperException | InterruptedException e) {
+        } catch (Exception e) {
             log.error("register group service failed, group: {}", group, e);
             throw new PRPCException("register group service failed, group: " + group, e);
         }
     }
 
+    private String getServerUri(PRPConfig.PGroup group) throws UnsupportedEncodingException {
+        String serverUri = "prpc://" + NetUtils.getLocalHost() + ":" + serverPort + "?protocol=prpc&codec="
+                + group.getCodec() + "&group=" + group.getGroup();
+        return URLEncoder.encode(serverUri, "UTF-8");
+    }
+
     @Override
     @Deprecated
     public void register(Class<?> service) {
-        PRPC prpc = service.getAnnotation(PRPC.class);
-        String group = Optional.ofNullable(prpc).map(e -> e.group()).orElse("default");
-        if (!groupService.containsKey(group)) {
-            groupService.put(group, Lists.newArrayList(service));
-        } else {
-            groupService.get(group).add(service);
-        }
-        try {
-            String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
-            createZkPathIfNotExist(servicePath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-            String providerPath = servicePath + SEPARATOR + "provider";
-            createZkPathIfNotExist(providerPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-            String server = NetUtils.getLocalHost() + ":" + serverPort;
-            String serverPath = providerPath + SEPARATOR + server;
-            createZkPathIfNotExist(serverPath, EMPTY_BYTES, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-
-            log.info("register service [{}] success, provider info: {}", service.getName(), server);
-        } catch (KeeperException | InterruptedException e) {
-            log.error("register service [{}] failed", service.getName(), e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     private void createZkPathIfNotExist(String path, byte[] value, List<ACL> acl, CreateMode createMode)
@@ -174,17 +162,18 @@ public class PRPC2ZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public void unregister() {
-        groupService.forEach((group, services) -> {
+        groups.forEach(group -> {
+            List<Class<?>> services = group.getServices();
             if (CollectionUtils.isNotEmpty(services)) {
                 services.forEach(service -> {
-                    String serverPath = basePath + SEPARATOR + service.getName() + ":" + group
-                            + SEPARATOR + "provider"
-                            + SEPARATOR + NetUtils.getLocalHost() + ":" + serverPort;
                     try {
+                        String serverPath = basePath + SEPARATOR + service.getName() + ":" + group.getGroup()
+                                + SEPARATOR + "provider"
+                                + SEPARATOR + getServerUri(group);
                         zooKeeper.delete(serverPath, -1);
                         log.info("unregister service [{}] success, serverPort: {}", service.getName(), serverPort);
                     } catch (Exception e) {
-                        log.error("unregister service [{}] failed, serverPort: {}", service.getName(), serverPort);
+                        log.error("unregister service [{}] failed, serverPort: {}", service.getName(), serverPort, e);
                     }
                 });
             }

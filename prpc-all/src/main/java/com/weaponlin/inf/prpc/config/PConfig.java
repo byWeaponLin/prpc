@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@Deprecated
 @NoArgsConstructor
 @AllArgsConstructor
 public class PConfig {

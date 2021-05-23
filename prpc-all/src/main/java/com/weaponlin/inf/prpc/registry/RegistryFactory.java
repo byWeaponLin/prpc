@@ -17,24 +17,12 @@ public class RegistryFactory {
         // TODO validate config here
         if (NoneRegistry.REGISTRY.equals(config.getRegistry())) {
             return new NoneRegistry(config);
-        } else if (PRPCZooKeeperRegistry.REGISTRY.equals(config.getRegistry())) {
+        } else if (PRPC2ZooKeeperRegistry.REGISTRY.equals(config.getRegistry())) {
             return new PRPCZooKeeperRegistry(port, config.getAddress(), config.getConnectionTimeout());
         }
 
         throw new PRPCException(String.format("invalid registry: %s, optional values is: %s, %s",
                 config.getRegistry(), NoneRegistry.REGISTRY, PRPCZooKeeperRegistry.REGISTRY));
-    }
-
-    public static Registry createRegistry(String naming, String address, int port) {
-        if (NoneRegistry.REGISTRY.equals(naming)) {
-            // TODO
-            return new NoneRegistry(null);
-        } else if (PRPCZooKeeperRegistry.REGISTRY.equals(naming)) {
-            return new PRPCZooKeeperRegistry(port, address, 30000);
-        }
-
-        throw new PRPCException(String.format("invalid registry: %s, optional values is: %s, %s",
-                naming, NoneRegistry.REGISTRY, PRPCZooKeeperRegistry.REGISTRY));
     }
 
     public static Registry createRegistry(PRPConfig.PRegistryCenter registryCenter,
