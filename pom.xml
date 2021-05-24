@@ -4,17 +4,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.weaponlin.prpc</groupId>
+    <groupId>com.weaponlin.inf.prpc</groupId>
     <artifactId>prpc</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>prpc-grpc</module>
         <module>prpc-all</module>
+        <module>prpc-spring-boot-starter</module>
     </modules>
 
     <dependencies>
+        <dependency>
+            <groupId>com.weaponlin.inf.prpc</groupId>
+            <artifactId>prpc-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
