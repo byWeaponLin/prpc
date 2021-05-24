@@ -9,6 +9,9 @@ public enum CodecType {
 
     json,
     protobuf,
+    fastjson,
+    jackson,
+    hessian2,
 
     ;
 

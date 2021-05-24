@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PClientRequestor implements PRequestor {
 
-    private PCluster pCluster;
+    private PCluster cluster;
 
     private PRPConfig.PGroup group;
 
@@ -22,7 +22,7 @@ public class PClientRequestor implements PRequestor {
         this.group = group;
         LoadBalance loadBalance = ServiceLoader.getService(LoadBalance.class, group.getLoadBalance());
         // TODO replace by ServiceLoader
-        pCluster = new PFailfastCluster(loadBalance);
+        cluster = new PFailfastCluster(loadBalance);
     }
 
     /**
@@ -34,6 +34,6 @@ public class PClientRequestor implements PRequestor {
      */
     @Override
     public Object request(PRequest request) {
-        return pCluster.request(request);
+        return cluster.request(request);
     }
 }

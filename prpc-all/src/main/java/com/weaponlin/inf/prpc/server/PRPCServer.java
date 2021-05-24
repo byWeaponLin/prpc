@@ -73,6 +73,7 @@ public class PRPCServer {
                 Optional.ofNullable(config.getConnectionTimeout()).filter(e -> e <= 0)
                         .ifPresent(group::setConnectionTimeouts);
             }
+            // TODO codec从Extension里获取
             if (StringUtils.isBlank(group.getCodec()) || !CodecType.contain(group.getCodec())) {
                 Optional.ofNullable(config.getCodec()).filter(StringUtils::isNotBlank)
                         .filter(CodecType::contain)
