@@ -210,27 +210,7 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
 
     @Override
     public synchronized void subscribe(Class<?> service) {
-        PRPC prpc = service.getAnnotation(PRPC.class);
-        String group = prpc.group();
-        if (!groupService.containsKey(group)) {
-            groupService.put(group, Lists.newArrayList(service));
-        } else {
-            groupService.get(group).add(service);
-        }
-        try {
-            // add watch
-            String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
-            String providerPath = servicePath + SEPARATOR + "provider";
-
-            zooKeeper.addWatch(providerPath, watchedEvent -> {
-                log.info("path: {}, type: {}, state: {}", watchedEvent.getPath(), watchedEvent.getType(),
-                        watchedEvent.getState());
-                refresh();
-            }, AddWatchMode.PERSISTENT);
-            refresh();
-        } catch (Exception e) {
-            log.error("zk watch failed", e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     private void discoverService(String service, List<String> serverPath) {

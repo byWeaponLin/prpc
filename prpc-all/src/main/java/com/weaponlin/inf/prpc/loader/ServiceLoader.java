@@ -11,6 +11,7 @@ import org.reflections.Reflections;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toList;
@@ -51,6 +52,27 @@ public class ServiceLoader {
                 log.error("load service failed, service: {}", clazz.getName());
             }
         });
+    }
+
+    public static <T> Set<String> getServiceExtension(@NonNull Class<T> clazz) {
+        if (!clazz.isInterface()) {
+            throw new PRPCException("load class must be an interface: " + clazz.getName());
+        }
+
+        if (loaders.containsKey(clazz)) {
+            return loaders.get(clazz).loadedService.keySet();
+        }
+
+        Reflections reflections = new Reflections(clazz);
+        final List<Class<? extends T>> candidates = reflections.getSubTypesOf(clazz)
+                .stream()
+                .filter(c -> c.getDeclaredAnnotation(Extension.class) != null)
+                .collect(toList());
+        final Service<T> service = new Service<>(candidates);
+        service.loadAllService();
+        loaders.put(clazz, service);
+
+        return service.loadedService.keySet();
     }
 
     public synchronized static <T> T getService(@NonNull Class<T> clazz, String extensionName) {
@@ -110,6 +132,19 @@ public class ServiceLoader {
                             return null;
                         }
                     }).orElseThrow(() -> new PRPCException("load service failed, not found necessary candidate for " + name));
+        }
+
+        void loadAllService() {
+            candidates.stream().filter(clazz -> clazz.getDeclaredAnnotation(Extension.class) != null)
+                    .forEach(clazz -> {
+                        try {
+                            Extension extension = clazz.getDeclaredAnnotation(Extension.class);
+                            T instance = clazz.getConstructor().newInstance();
+                            loadedService.putIfAbsent(extension.name(), instance);
+                        } catch (Exception e) {
+                            log.error("load instance failed, class: {}", clazz.getName(), e);
+                        }
+                    });
         }
 
     }

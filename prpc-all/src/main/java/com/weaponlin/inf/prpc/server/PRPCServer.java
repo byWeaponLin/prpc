@@ -1,9 +1,10 @@
 package com.weaponlin.inf.prpc.server;
 
 import com.weaponlin.inf.prpc.codec.CodecPair;
-import com.weaponlin.inf.prpc.codec.CodecType;
+import com.weaponlin.inf.prpc.codec.PCodec;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.loader.ServiceLoader;
 import com.weaponlin.inf.prpc.protocol.ProtocolType;
 import com.weaponlin.inf.prpc.registry.Registry;
 import com.weaponlin.inf.prpc.registry.RegistryFactory;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.weaponlin.inf.prpc.config.PRPConfig.PGroup;
 import static com.weaponlin.inf.prpc.config.PRPConfig.PRegistryCenter;
@@ -73,10 +75,11 @@ public class PRPCServer {
                 Optional.ofNullable(config.getConnectionTimeout()).filter(e -> e <= 0)
                         .ifPresent(group::setConnectionTimeouts);
             }
-            // TODO codec从Extension里获取
-            if (StringUtils.isBlank(group.getCodec()) || !CodecType.contain(group.getCodec())) {
+            // codec从Extension里获取
+            Set<String> codecSet = ServiceLoader.getServiceExtension(PCodec.class);
+            if (StringUtils.isBlank(group.getCodec()) || !codecSet.contains(group.getCodec().toLowerCase())) {
                 Optional.ofNullable(config.getCodec()).filter(StringUtils::isNotBlank)
-                        .filter(CodecType::contain)
+                        .filter(codec -> codecSet.contains(codec.toLowerCase()))
                         .ifPresent(group::setCodec);
             }
 
