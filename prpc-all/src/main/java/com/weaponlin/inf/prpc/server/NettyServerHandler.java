@@ -32,7 +32,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         try {
-            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(meta.getServiceName(),
+            String group = packet.getGroup();
+            Pair<Object, Method> instanceAndMethod = PInterface.getInstanceAndMethod(group, meta.getServiceName(),
                     meta.getMethodName(), meta.getParameterTypes());
 
             log.info("receive request, request id: {}, service: {}, method: {}", meta.getRequestId(),

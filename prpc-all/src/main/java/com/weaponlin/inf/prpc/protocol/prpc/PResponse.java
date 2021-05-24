@@ -38,4 +38,9 @@ public class PResponse extends AbstractPacket implements Serializable {
                 .setServiceName(serviceName)
                 .setMethodName(methodName);
     }
+
+    @Override
+    public String getGroup() {
+        return null;
+    }
 }

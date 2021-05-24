@@ -1,7 +1,5 @@
 package com.weaponlin.inf.prpc.registry.zookeeper;
 
-import com.google.common.collect.Lists;
-import com.weaponlin.inf.prpc.annotation.PRPC;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.registry.AbstractRegistry;
@@ -25,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -192,7 +189,7 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
             groupService.putIfAbsent(group.getGroup(), serviceList);
             serviceList.forEach(service -> {
                 try {
-                    String servicePath = basePath + SEPARATOR + service.getName() + ":" + group;
+                    String servicePath = basePath + SEPARATOR + service.getName() + ":" + group.getGroup();
                     String providerPath = servicePath + SEPARATOR + "provider";
 
                     zooKeeper.addWatch(providerPath, watchedEvent -> {

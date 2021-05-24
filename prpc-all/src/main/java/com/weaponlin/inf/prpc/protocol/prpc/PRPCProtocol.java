@@ -75,7 +75,6 @@ public class PRPCProtocol extends AbstractProtocol {
             meta = (PMeta) decode(metaBytes, this.meta);
             this.meta.validate();
 
-            // TODO json 反序列化失败了
             // body
             byte[] bodyBytes = new byte[this.header.getBodySize()];
             byteBuf.readBytes(bodyBytes);

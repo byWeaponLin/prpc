@@ -9,11 +9,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -42,10 +46,12 @@ public class PInterface {
     private static Map<String, PInterface> cachedInstances = new ConcurrentHashMap<>();
 
     // TODO 适配其他协议
-    public static Pair<Object, Method> getInstanceAndMethod(String serviceName, String methodName,
-                                                            Class<?>[] parameterTypes) {
+    public static Pair<Object, Method> getInstanceAndMethod(String group, String serviceName,
+                                                            String methodName, Class<?>[] parameterTypes) {
         try {
-            PInterface pInterface = cachedInstances.get(serviceName);
+            String key = serviceName + ":" + Optional.ofNullable(group)
+                    .filter(StringUtils::isNotBlank).orElse("");
+            PInterface pInterface = cachedInstances.get(key);
             if (pInterface == null) {
                 Reflections reflections = new Reflections(serviceName);
                 final Class<?> apiClass = Class.forName(serviceName);
@@ -58,60 +64,11 @@ public class PInterface {
                         .serviceInstance(serviceInstance)
                         .methods(new ConcurrentHashMap<>())
                         .build();
-                cachedInstances.put(serviceName, pInterface);
+                cachedInstances.put(key, pInterface);
             }
             return pInterface.getInstanceAndMethod(methodName, parameterTypes);
         } catch (Exception e) {
             throw new PRPCException("cant extract service instance and method instance", e);
-        }
-    }
-
-    public static Pair<Object, Method> getInstanceAndMethod(String serviceName, String methodName) {
-        try {
-            PInterface pInterface = cachedInstances.get(serviceName);
-            if (pInterface == null) {
-                Reflections reflections = new Reflections(serviceName);
-                final Class<?> apiClass = Class.forName(serviceName);
-                final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) apiClass);
-                final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
-                Object serviceInstance = implementationClass.getConstructor().newInstance();
-                pInterface = PInterface.builder()
-                        .serviceName(serviceName)
-                        .serviceClass(apiClass)
-                        .serviceInstance(serviceInstance)
-                        .methods(new ConcurrentHashMap<>())
-                        .build();
-                cachedInstances.put(serviceName, pInterface);
-            }
-            return pInterface.getInstanceAndMethod(methodName);
-        } catch (Exception e) {
-            throw new PRPCException("cant extract service instance and method instance", e);
-        }
-    }
-
-    private Pair<Object, Method> getInstanceAndMethod(String methodName) {
-        PMethod pmethod = PMethod.newMethod(methodName);
-        if (methods.containsKey(pmethod)) {
-            Method methodInstance = methods.get(pmethod);
-            return Pair.of(serviceInstance, methodInstance);
-        }
-        try {
-            // TODO 待优化，后面pmethod设置了parameterTypes，导致前面找不到构造pmethod的时候找不到，永远都会走下面这个逻辑
-            for (Method declaredMethod : serviceClass.getDeclaredMethods()) {
-                if (declaredMethod.getName().equals(methodName)) {
-                    Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
-                    pmethod.setParameterTypes(parameterTypes);
-
-                    methods.putIfAbsent(pmethod, declaredMethod);
-                    return Pair.of(serviceInstance, methods.get(pmethod));
-                }
-            }
-            throw new RuntimeException("not found declared method");
-        } catch (Exception e) {
-            throw new PRPCException(
-                    String.format("not found declared method for service: %s, method: %s",
-                            serviceName, methodName),
-                    e);
         }
     }
 
@@ -141,8 +98,18 @@ public class PInterface {
         });
     }
 
+    public synchronized static void registerInterface(String group, List<Class<?>> services) {
+        if (CollectionUtils.isEmpty(services)) {
+            return;
+        }
+        services.forEach(service -> {
+            registerInterface(group, service);
+        });
+    }
+
     public synchronized static void registerInterface(String group, Class<?> service) {
-        String key = service.getName() + ":" + group;
+        String key = service.getName() + ":" + Optional.ofNullable(group)
+                .filter(StringUtils::isNotBlank).orElse("");
         if (cachedInstances.containsKey(key)) {
             return;
         }

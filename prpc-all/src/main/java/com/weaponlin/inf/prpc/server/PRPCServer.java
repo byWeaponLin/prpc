@@ -34,6 +34,7 @@ import java.util.Set;
 import static com.weaponlin.inf.prpc.config.PRPConfig.PGroup;
 import static com.weaponlin.inf.prpc.config.PRPConfig.PRegistryCenter;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 
 @Slf4j
 public class PRPCServer {
@@ -115,6 +116,13 @@ public class PRPCServer {
                     Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
                     registry.register();
                     registries.add(registry);
+
+                    groups.forEach(group -> {
+                        PInterface.registerInterface(group.getGroup(), group.getServices());
+                        log.info("register instance success, group: {}, services: {}", group.getGroup(),
+                                group.getServices().stream().map(Class::getName).collect(joining(",")));
+                    });
+
                     log.info("start and register service success, ");
                     startServer(protocolType, codec, serverPort);
                     log.info("start server success, server port: {}", serverPort);

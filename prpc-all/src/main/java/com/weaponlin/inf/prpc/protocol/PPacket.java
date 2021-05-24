@@ -7,4 +7,6 @@ public interface PPacket {
     PMeta getMeta();
 
     boolean isHeartbeat();
+
+    String getGroup();
 }

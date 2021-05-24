@@ -37,4 +37,9 @@ public class DubboRequest extends AbstractPacket {
                 .setParameterTypes(parameterTypes)
                 .setParams(arguments);
     }
+
+    @Override
+    public String getGroup() {
+        return null;
+    }
 }
