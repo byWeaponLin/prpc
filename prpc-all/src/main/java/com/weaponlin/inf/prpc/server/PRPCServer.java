@@ -107,28 +107,30 @@ public class PRPCServer {
     }
 
     public void start() {
-        protocolRegistryMap.forEach((protocol, registryCenters) -> {
-            ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
-            registryCenters.forEach((registryCenter, codecGroups) -> {
-                codecGroups.forEach((codec, groups) -> {
-                    int serverPort = PortUtils.getAvailablePort();
-                    // 注册
-                    Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
-                    registry.register();
-                    registries.add(registry);
+        new Thread(() -> {
+            protocolRegistryMap.forEach((protocol, registryCenters) -> {
+                ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
+                registryCenters.forEach((registryCenter, codecGroups) -> {
+                    codecGroups.forEach((codec, groups) -> {
+                        int serverPort = PortUtils.getAvailablePort();
+                        // 注册
+                        Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
+                        registry.register();
+                        registries.add(registry);
 
-                    groups.forEach(group -> {
-                        PInterface.registerInterface(group.getGroup(), group.getServices());
-                        log.info("register instance success, group: {}, services: {}", group.getGroup(),
-                                group.getServices().stream().map(Class::getName).collect(joining(",")));
+                        groups.forEach(group -> {
+                            PInterface.registerInterface(group.getGroup(), group.getServices());
+                            log.info("register instance success, group: {}, services: {}", group.getGroup(),
+                                    group.getServices().stream().map(Class::getName).collect(joining(",")));
+                        });
+
+                        log.info("start and register service success, ");
+                        startServer(protocolType, codec, serverPort);
+                        log.info("start server success, server port: {}", serverPort);
                     });
-
-                    log.info("start and register service success, ");
-                    startServer(protocolType, codec, serverPort);
-                    log.info("start server success, server port: {}", serverPort);
                 });
             });
-        });
+        }).start();
     }
 
     private void startServer(ProtocolType protocolType, String codec, int serverPort) {

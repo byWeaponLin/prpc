@@ -1,0 +1,32 @@
+prpc:
+  server:
+    protocol: prpc
+    rigistry:
+      naming: zookeeper
+      address: zookeeper://127.0.0.1:2181/prpc/online
+    codec: protobuf
+    package: com.weaponlin.inf.prpc.test
+    timeout: 30000
+    groups:
+      - group: default
+        registry:
+          naming: zookeeper
+          address: zookeeper://127.0.0.1:2181/prpc/online
+        codec: protobuf
+        protocol: http
+        timeout: 30000
+      - group: test
+        registry:
+          naming: zookeeper
+          address: zookeeper://127.0.0.1:2181/prpc/online
+        codec: json
+        protocol: dubbo
+        timeout: 30000
+  client:
+    protocol: prpc
+    rigistry:
+      naming: zookeeper
+      address: zookeeper://127.0.0.1:2181/prpc/online
+    codec: protobuf
+    loadbalance: roundrobin
+    cluster: failfast
