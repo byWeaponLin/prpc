@@ -1,4 +1,4 @@
-package com.weaponlin.inf.prpc.sprint.boot.starter.api;
+package com.weaponlin.inf.prpc.api.hello;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,8 +1,8 @@
 package com.weaponlin.inf.prpc.registry.prpc.zk_jackson;
 
 import com.google.common.collect.Lists;
-import com.weaponlin.inf.prpc.api.HelloApi;
-import com.weaponlin.inf.prpc.api.HelloRequest;
+import com.weaponlin.inf.prpc.api.hello.HelloApi;
+import com.weaponlin.inf.prpc.api.hello.HelloRequest;
 import com.weaponlin.inf.prpc.client.PRPClient;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 

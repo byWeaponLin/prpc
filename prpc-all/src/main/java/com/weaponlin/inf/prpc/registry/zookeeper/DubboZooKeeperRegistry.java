@@ -94,6 +94,7 @@ public class DubboZooKeeperRegistry extends AbstractRegistry {
         groups.stream().forEach(group -> {
             String basePackage = group.getBasePackage();
             List<Class<?>> serviceList = ClassScanUtil.getInterface(basePackage);
+            group.setServices(serviceList);
             groupMap.putIfAbsent(group, serviceList);
             register(group, serviceList);
         });

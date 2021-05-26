@@ -2,7 +2,7 @@ package com.weaponlin.inf.prpc.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.weaponlin.inf.prpc.api.HelloRequest;
+import com.weaponlin.inf.prpc.api.hello.HelloRequest;
 import org.junit.Test;
 
 import java.io.IOException;

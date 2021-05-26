@@ -1,4 +1,4 @@
-package com.weaponlin.inf.prpc.sprint.boot.starter.api;
+package com.weaponlin.inf.prpc.api.hello;
 
 import org.apache.commons.lang3.RandomStringUtils;
 

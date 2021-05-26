@@ -56,6 +56,7 @@ an rpc framework
 - [ ] ByteBuf.release() was not called before it's garbage-collected. See https://netty.io/wiki/reference-counted-objects.html
 - [ ] meta里添加rpc version等信息，方便后续扩展
 - [ ] 支持dubbo协议，但是没调用几次provider就会关闭，consumer提示provider关闭了
+- [ ] 支持标注@ExportService注解的服务发布
 
 ## 4 Quick Start
 

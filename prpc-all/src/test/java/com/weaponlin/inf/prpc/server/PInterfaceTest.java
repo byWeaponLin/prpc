@@ -1,6 +1,6 @@
 package com.weaponlin.inf.prpc.server;
 
-import com.weaponlin.inf.prpc.api.HelloApi;
+import com.weaponlin.inf.prpc.api.hello.HelloApi;
 import org.junit.Test;
 
 import java.util.stream.Stream;

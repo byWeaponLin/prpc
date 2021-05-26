@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * TODO 支持标注@ExportService注解的服务发布
+ */
 public class ServiceExportingRegister extends AbstractRegister implements ImportBeanDefinitionRegistrar {
     private static final String BEAN_NAME_SUFFIX = "ServiceExporterRegisterBean";
 

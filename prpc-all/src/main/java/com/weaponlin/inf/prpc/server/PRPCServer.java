@@ -107,30 +107,30 @@ public class PRPCServer {
     }
 
     public void start() {
-        new Thread(() -> {
-            protocolRegistryMap.forEach((protocol, registryCenters) -> {
-                ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
-                registryCenters.forEach((registryCenter, codecGroups) -> {
-                    codecGroups.forEach((codec, groups) -> {
-                        int serverPort = PortUtils.getAvailablePort();
-                        // 注册
-                        Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
-                        registry.register();
-                        registries.add(registry);
+        protocolRegistryMap.forEach((protocol, registryCenters) -> {
+            ProtocolType protocolType = ProtocolType.getProtocolType(protocol);
+            registryCenters.forEach((registryCenter, codecGroups) -> {
+                codecGroups.forEach((codec, groups) -> {
+                    int serverPort = PortUtils.getAvailablePort();
+                    // 注册
+                    Registry registry = RegistryFactory.createRegistry(registryCenter, groups, protocolType, serverPort);
+                    registry.register();
+                    registries.add(registry);
 
-                        groups.forEach(group -> {
-                            PInterface.registerInterface(group.getGroup(), group.getServices());
-                            log.info("register instance success, group: {}, services: {}", group.getGroup(),
-                                    group.getServices().stream().map(Class::getName).collect(joining(",")));
-                        });
-
-                        log.info("start and register service success, ");
-                        startServer(protocolType, codec, serverPort);
-                        log.info("start server success, server port: {}", serverPort);
+                    groups.forEach(group -> {
+                        PInterface.registerInterface(group.getGroup(), group.getServices());
+                        log.info("register instance success, group: {}, services: {}", group.getGroup(),
+                                group.getServices().stream().map(Class::getName).collect(joining(",")));
                     });
+
+                    log.info("start and register service success");
+                    new Thread(() -> {
+                        startServer(protocolType, codec, serverPort);
+                    }).start();
+                    log.info("start server success, server port: {}", serverPort);
                 });
             });
-        }).start();
+        });
     }
 
     private void startServer(ProtocolType protocolType, String codec, int serverPort) {
@@ -152,8 +152,10 @@ public class PRPCServer {
                             ChannelPipeline pipeline = ch.pipeline();
 //                            pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             // 这里添加解码器和编码器，防止拆包和粘包问题
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-                            pipeline.addLast(new LengthFieldPrepender(4));
+                            if (protocolType !=ProtocolType.dubbo) {
+                                pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                                pipeline.addLast(new LengthFieldPrepender(4));
+                            }
 
                             // 自定义序列化协议
                             pipeline.addLast(codecPair.getEncoder());

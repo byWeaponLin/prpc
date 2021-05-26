@@ -1,5 +1,6 @@
-package com.weaponlin.inf.prpc.registry.dubbo.zk_hessian2;
+package com.weaponlin.inf.prpc.registry.dubbo_prpc.zk_proto;
 
+import com.google.common.collect.Lists;
 import com.weaponlin.inf.prpc.api.hello.HelloApi;
 import com.weaponlin.inf.prpc.api.hello.HelloRequest;
 import com.weaponlin.inf.prpc.client.PRPClient;
@@ -15,7 +16,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class ClientTest {
+public class PRPClientTest {
 
     public static void main(String[] args) {
         PRPConfig config = new PRPConfig();
@@ -23,6 +24,12 @@ public class ClientTest {
         registryCenter.setNaming("zookeeper");
         registryCenter.setAddress("127.0.0.1:2181");
         config.setRegistryCenter(registryCenter);
+        config.setLoadBalance("roundrobin");
+        PRPConfig.PGroup group = new PRPConfig.PGroup();
+        group.setProtocol("prpc");
+        group.setBasePackage("com.weaponlin.inf.prpc.api.hello");
+        group.setLoadBalance("roundrobin");
+        config.setGroups(Lists.newArrayList(group));
         HelloApi helloApi = new PRPClient(config).getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);
