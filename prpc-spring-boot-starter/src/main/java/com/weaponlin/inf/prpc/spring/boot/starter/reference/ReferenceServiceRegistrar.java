@@ -40,7 +40,8 @@ public class ReferenceServiceRegistrar extends AbstractRegister implements Impor
 
         references.forEach(fieldType -> {
             BeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(ReferenceServiceFactoryBean.class)
-                    .addPropertyReference("rpcProperties", "rpcProperties")
+                    .addPropertyReference("prpcProperties", "prpcProperties")
+                    .addPropertyReference("prpClient", "prpClient")
                     .addConstructorArgValue(fieldType)
                     .getBeanDefinition();
             String name = beanNameGenerator.generateBeanName(bd, registry);

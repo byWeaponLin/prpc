@@ -13,8 +13,6 @@ import org.springframework.core.io.ResourceLoader;
 import java.util.Collection;
 
 public abstract class AbstractRegister implements ResourceLoaderAware, EnvironmentAware, BeanFactoryAware {
-    protected static final String STARGATE_CONFIGURATION_BEAN_NAME =
-            "cpdinf.stargate-com.baidu.formula.stargate.spring.boot.autoconfigure.StargateProperties";
 
     protected BeanFactory beanFactory;
     protected ResourceLoader resourceLoader;

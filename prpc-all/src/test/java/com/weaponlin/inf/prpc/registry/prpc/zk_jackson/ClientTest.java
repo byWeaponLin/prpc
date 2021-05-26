@@ -3,7 +3,7 @@ package com.weaponlin.inf.prpc.registry.prpc.zk_jackson;
 import com.google.common.collect.Lists;
 import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.api.HelloRequest;
-import com.weaponlin.inf.prpc.client.PClient;
+import com.weaponlin.inf.prpc.client.PRPClient;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class ClientTest {
         group.setLoadBalance("roundrobin");
         group.setCodec("jackson");
         config.setGroups(Lists.newArrayList(group));
-        HelloApi helloApi = new PClient(config).getService(HelloApi.class);
+        HelloApi helloApi = new PRPClient(config).getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);
         // TODO if size = 2222222 then client get response is null

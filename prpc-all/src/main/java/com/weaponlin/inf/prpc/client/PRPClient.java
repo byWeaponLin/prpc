@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PClient {
+public class PRPClient {
 
     private Map<Class<?>, Object> serviceInstances = new ConcurrentHashMap<>();
 
@@ -24,7 +24,7 @@ public class PClient {
 
     private Map<Class<?>, PRPConfig.PGroup> serviceGroup;
 
-    public PClient(PRPConfig config) {
+    public PRPClient(PRPConfig config) {
         this.registryMap = new ConcurrentHashMap<>();
         this.serviceGroup = new ConcurrentHashMap<>();
         this.config = config;

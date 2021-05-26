@@ -2,7 +2,7 @@ package com.weaponlin.inf.prpc.registry.dubbo.zk_hessian2;
 
 import com.weaponlin.inf.prpc.api.HelloApi;
 import com.weaponlin.inf.prpc.api.HelloRequest;
-import com.weaponlin.inf.prpc.client.PClient;
+import com.weaponlin.inf.prpc.client.PRPClient;
 import com.weaponlin.inf.prpc.config.PRPConfig;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class ClientTest {
         registryCenter.setNaming("zookeeper");
         registryCenter.setAddress("127.0.0.1:2181");
         config.setRegistryCenter(registryCenter);
-        HelloApi helloApi = new PClient(config).getService(HelloApi.class);
+        HelloApi helloApi = new PRPClient(config).getService(HelloApi.class);
 
         Scanner scanner = new Scanner(System.in);
         // TODO if size = 2222222 then client get response is null
