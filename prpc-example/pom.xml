@@ -15,8 +15,9 @@
 
     <name>prpc-example</name>
     <modules>
-        <module>prpc-spring-boot-starter-example</module>
-        <module>example</module>
+        <module>prpc-spring-boot-starter-consumer</module>
+        <module>api</module>
+        <module>prpc-spring-boot-starter-provider</module>
     </modules>
 
 

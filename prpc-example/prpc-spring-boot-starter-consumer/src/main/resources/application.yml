@@ -1,20 +1,4 @@
 prpc:
-  server:
-    protocol: prpc
-    registryCenter:
-      naming: zookeeper
-      address: 127.0.0.1:2181
-    codec: protobuf
-    timeout: 30000
-    groups:
-      - group: default
-        registryCenter:
-          naming: zookeeper
-          address: 127.0.0.1:2181
-        codec: protobuf
-        protocol: prpc
-        timeout: 30000
-        basePackage: com.weaponlin.inf.prpc.api
   client:
     protocol: prpc
     registryCenter:

@@ -54,6 +54,7 @@ public class URI {
             URI uri = newURI(hosts[0], Integer.valueOf(hosts[1]));
             Map<String, String> params = Stream.of(split[1].split("&"))
                     .map(e -> e.split("="))
+                    .filter(arr -> arr.length == 2)
                     .collect(Collectors.toMap(a -> a[0], a -> a[1]));
             Optional.ofNullable(params.get("protocol"))
                     .filter(StringUtils::isNotBlank)
@@ -71,11 +72,9 @@ public class URI {
                     .filter(StringUtils::isNotBlank)
                     .ifPresent(uri::setIdc);
 
-            System.out.println("idc: " + uri.getIdc());
-
             return uri;
         } catch (Exception e) {
-            throw new PRPCException("analysis provider uri failed, uri: " + provider);
+            throw new PRPCException("analysis provider uri failed, uri: " + provider, e);
         }
     }
 }
