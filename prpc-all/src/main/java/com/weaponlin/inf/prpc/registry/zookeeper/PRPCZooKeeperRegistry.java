@@ -1,6 +1,8 @@
 package com.weaponlin.inf.prpc.registry.zookeeper;
 
 import com.weaponlin.inf.prpc.config.PRPConfig;
+import com.weaponlin.inf.prpc.env.SystemAttributes;
+import com.weaponlin.inf.prpc.env.SystemProperties;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import com.weaponlin.inf.prpc.registry.AbstractRegistry;
 import com.weaponlin.inf.prpc.remote.URI;
@@ -20,9 +22,11 @@ import org.apache.zookeeper.data.ACL;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -141,8 +145,17 @@ public class PRPCZooKeeperRegistry extends AbstractRegistry {
     }
 
     private String getServerUri(PRPConfig.PGroup group) throws UnsupportedEncodingException {
-        String serverUri = "prpc://" + NetUtils.getLocalHost() + ":" + serverPort + "?protocol=prpc&codec="
-                + group.getCodec() + "&group=" + group.getGroup();
+        Map<String, String> params = new HashMap<>();
+        params.put("protocol", "prpc");
+        params.put("codec", group.getCodec());
+        params.put("group", group.getGroup());
+        params.put("idc", SystemProperties.getSystemProperty(SystemAttributes.IDC, ""));
+
+        String paramString = params.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue())
+                .collect(joining("&", "?", ""));
+
+        String serverUri = "prpc://" + NetUtils.getLocalHost() + ":" + serverPort + paramString;
+
         return URLEncoder.encode(serverUri, "UTF-8");
     }
 

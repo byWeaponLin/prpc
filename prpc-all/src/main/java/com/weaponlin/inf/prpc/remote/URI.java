@@ -25,6 +25,8 @@ public class URI {
 
     private String protocol;
 
+    private String idc;
+
     public static URI newURI(String host, int port) {
         if (StringUtils.isBlank(host)) {
             throw new RuntimeException("host is blank, please check it");
@@ -64,6 +66,12 @@ public class URI {
             Optional.ofNullable(params.get("codec"))
                     .filter(StringUtils::isNotBlank)
                     .ifPresent(uri::setCodec);
+
+            Optional.ofNullable(params.get("idc"))
+                    .filter(StringUtils::isNotBlank)
+                    .ifPresent(uri::setIdc);
+
+            System.out.println("idc: " + uri.getIdc());
 
             return uri;
         } catch (Exception e) {
