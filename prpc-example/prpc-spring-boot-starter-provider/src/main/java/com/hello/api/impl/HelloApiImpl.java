@@ -1,5 +1,8 @@
-package com.weaponlin.inf.prpc.api;
+package com.hello.api.impl;
 
+import com.weaponlin.inf.prpc.api.HelloApi;
+import com.weaponlin.inf.prpc.api.HelloRequest;
+import com.weaponlin.inf.prpc.api.HelloResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class HelloApiImpl implements HelloApi {

@@ -1,12 +1,14 @@
 package com.weaponlin.inf.prpc.server;
 
 import com.weaponlin.inf.prpc.exception.PRPCException;
+import com.weaponlin.inf.prpc.utils.ClassScanUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -107,18 +109,22 @@ public class PInterface {
         });
     }
 
-    public synchronized static void registerInterface(String group, Class<?> service) {
+    public synchronized static void registerInterface(String group, @NonNull Class<?> service) {
         String key = service.getName() + ":" + Optional.ofNullable(group)
                 .filter(StringUtils::isNotBlank).orElse("");
         if (cachedInstances.containsKey(key)) {
             return;
         }
-        Reflections reflections = new Reflections(service);
 
         try {
+            // scan implementations
+            final Class<?> implementationClass = ClassScanUtil.loadClassByLoader().stream()
+                    .filter(clazz -> !clazz.isInterface())
+                    .filter(service::isAssignableFrom)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("not found subclass for " + service.getName()));
+
             // initialize api
-            final Set<Class<?>> subTypes = reflections.getSubTypesOf((Class<Object>) service);
-            final Class<?> implementationClass = (Class<?>) subTypes.toArray()[0];
             Object serviceInstance = implementationClass.getConstructor().newInstance();
             final PInterface pInterface = PInterface.builder()
                     .serviceName(service.getName())
@@ -131,7 +137,7 @@ public class PInterface {
             // initialize methods
             pInterface.registerMethods();
         } catch (Exception e) {
-            throw new PRPCException("register server interface failed");
+            throw new PRPCException("register server interface failed", e);
         }
     }
 

@@ -39,7 +39,32 @@ an rpc framework
 
 ## 3 Quick Start
 
+demo详情可查看prpc-example
 
+### 3.1 引用依赖
+
+```xml
+<dependency>
+    <groupId>com.weaponlin.inf.prpc</groupId>
+    <artifactId>prpc-spring-boot-starter</artifactId>
+    <version>${latest-version}</version>
+</dependency>
+```
+
+### 3.2 定义api
+```java
+public interface HelloApi {
+    HelloResponse hello(Long userId, HelloRequest request);
+}
+```
+
+### 3.3 创建provider(服务提供方)
+
+
+### 3.4 创建consumer(服务消费方)
+
+
+### 
 
 
 ## 4 TODO

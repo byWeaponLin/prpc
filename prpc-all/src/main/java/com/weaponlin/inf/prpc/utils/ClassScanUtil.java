@@ -3,6 +3,7 @@ package com.weaponlin.inf.prpc.utils;
 import com.google.common.collect.Lists;
 import com.weaponlin.inf.prpc.exception.PRPCException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.jar.JarEntry;
@@ -55,36 +57,35 @@ public class ClassScanUtil {
      */
     private static List<String> doScan(String basePackage, List<String> nameList) throws IOException {
         String packagePath = basePackage.replaceAll("\\.", "/");
-        //file:/D:/WorkSpace/java/ScanTest/target/classes/com/scan
-        URL url = cl.getResource(packagePath);
-        String filePath = getRootPath(url);
-        // contains the name of the class file. e.g., Apple.class will be stored as "Apple"
-        List<String> names = null;
-        // 先判断是否是jar包，如果是jar包，通过JarInputStream产生的JarEntity去递归查询所有类
-        if (isJarFile(filePath)) {
-            if (log.isDebugEnabled()) {
-                log.debug("{} 是一个JAR包", filePath);
-            }
-            names = readFromJarFile(filePath, packagePath);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("{} 是一个目录", filePath);
-            }
-            names = readFromDirectory(filePath);
-        }
-        for (String name : names) {
-            if (isClassFile(name)) {
-                nameList.add(toFullyQualifiedName(name, basePackage));
+
+        Enumeration<URL> resources = cl.getResources(packagePath);
+        List<String> classes = new ArrayList<>();
+        while (resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            String filePath = getRootPath(url);
+            List<String> names = null;
+            if (isJarFile(filePath)) {
+                names = readFromJarFile(filePath, packagePath);
             } else {
-                doScan(basePackage + "." + name, nameList);
+                names = readFromDirectory(filePath);
+            }
+            for (String name : names) {
+                if (isClassFile(name)) {
+                    nameList.add(toFullyQualifiedName(name, basePackage));
+                } else {
+                    doScan(basePackage + "." + name, nameList);
+                }
+            }
+            if (log.isDebugEnabled()) {
+                for (String n : nameList) {
+                    log.debug("找到{}", n);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(nameList)) {
+                classes.addAll(nameList);
             }
         }
-        if (log.isDebugEnabled()) {
-            for (String n : nameList) {
-                log.debug("找到{}", n);
-            }
-        }
-        return nameList;
+        return classes;
     }
 
     private static String toFullyQualifiedName(String shortName, String basePackage) {
@@ -95,9 +96,6 @@ public class ClassScanUtil {
     }
 
     private static List<String> readFromJarFile(String jarPath, String splashedPackageName) throws IOException {
-        if (log.isDebugEnabled()) {
-            log.debug("从JAR包中读取类: {}", jarPath);
-        }
         JarInputStream jarIn = new JarInputStream(new FileInputStream(jarPath));
         JarEntry entry = jarIn.getNextJarEntry();
         List<String> nameList = new ArrayList<String>();
@@ -143,12 +141,68 @@ public class ClassScanUtil {
         return name.endsWith(".jar");
     }
 
+    public static List<Class> loadClassByLoader() throws Exception {
+        return loadClassByLoader(cl);
+    }
+
+    /**
+     * 通过loader加载所有类
+     *
+     * @param classLoader
+     * @return
+     * @throws Exception
+     */
+    public static List<Class> loadClassByLoader(ClassLoader classLoader) throws Exception {
+        Enumeration<URL> urls = classLoader.getResources("");
+        List<Class> classes = new ArrayList<Class>();
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            // 文件类型（其实是文件夹）
+            if (url.getProtocol().equals("file")) {
+                loadClassByPath(null, url.getPath(), classes, classLoader);
+            }
+        }
+        return classes;
+    }
+
+    // 通过文件路径加载所有类 root 主要用来替换path中前缀（除包路径以外的路径）
+
+    private static void loadClassByPath(String root, String path, List<Class> list, ClassLoader load) {
+        File f = new File(path);
+        if (root == null) root = f.getPath();
+        // 判断是否是class文件
+        if (f.isFile() && f.getName().matches("^.*\\.class$")) {
+            try {
+                String classPath = f.getPath();
+                //截取出className 将路径分割符替换为.（windows是\ linux、mac是/）
+                String className = classPath.substring(root.length() + 1, classPath.length() - 6).replace('/', '.').replace('\\', '.');
+                list.add(load.loadClass(className));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            File[] fs = f.listFiles();
+            if (fs == null) return;
+            for (File file : fs) {
+                loadClassByPath(root, file.getPath(), list, load);
+            }
+        }
+    }
+
     /**
      * For test purpose.
      */
     public static void main(String[] args) throws Exception {
-        List<Class<?>> interfacees = ClassScanUtil.getInterface("com.weaponlin.inf.prpc");
-        interfacees.forEach(e -> System.out.println(e.getName()));
+//        List<Class<?>> interfacees = ClassScanUtil.getInterface("com.weaponlin.inf.prpc");
+//        interfacees.forEach(e -> System.out.println(e.getName()));
+
+//        String path = ClassScanUtil.class.getClassLoader().getResource("").getPath();
+//        path = path.substring(0, path.length() - 1);
+//        path = path.substring(0, path.lastIndexOf("/"));
+//        ClassScanUtil.getFullyQualifiedClassNameList(path).forEach(e -> System.out.println(e));
+
+        loadClassByLoader(ClassScanUtil.class.getClassLoader()).forEach(e -> System.out.println(e.getName()));
+
 
     }
 }
